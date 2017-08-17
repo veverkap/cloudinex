@@ -32,9 +32,12 @@ defmodule Cloudinex.Mixfile do
       {:hackney, "~> 1.9", override: true},
       {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
-      {:tesla, "~> 0.7.1"},
+      {:tesla, github: "veverkap/tesla"},
 
-      {:credo, "> 0.0.0", only: :dev},
+      {:bypass, "~> 0.8", only: :test},
+      {:credo, "~> 0.8", only: [:dev, :test]},
+      {:ex_guard, "~> 1.2", only: :dev},
+      {:plug, "~> 1.4", only: [:dev, :test]}
     ]
   end
 end

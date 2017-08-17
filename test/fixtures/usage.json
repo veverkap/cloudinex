@@ -1,0 +1,27 @@
+{
+  "plan": "Free",
+  "last_updated": "2017-08-16",
+  "transformations": {
+    "usage": 14,
+    "limit": 7500,
+    "used_percent": 0.19
+  },
+  "objects": {
+    "usage": 216,
+    "limit": 125000,
+    "used_percent": 0.17
+  },
+  "bandwidth": {
+    "usage": 1633009,
+    "limit": 6442450944,
+    "used_percent": 0.03
+  },
+  "storage": {
+    "usage": 20860952,
+    "limit": 2671771648,
+    "used_percent": 0.78
+  },
+  "requests": 186,
+  "resources": 56,
+  "derived_resources": 160
+}

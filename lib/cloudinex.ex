@@ -1,26 +1,29 @@
 defmodule Cloudinex do
+  @moduledoc false
   use Tesla
+  require Logger
+  import Cloudinex.Helpers
 
-  plug Tesla.Middleware.BaseUrl, "https://api.cloudinary.com/v1_1/#{Application.get_env(:cloudinex, :cloud_name)}"
+  plug Tesla.Middleware.BaseUrl, base_url()
   plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
                                    password: Application.get_env(:cloudinex, :secret)
   plug Tesla.Middleware.FormUrlencoded
   plug Tesla.Middleware.JSON
-  plug Tesla.Middleware.DebugLogger
+
   adapter Tesla.Adapter.Hackney
 
   def ping do
-    get("/ping")
+    get(client(), "/ping")
     |> handle_response
   end
 
   def usage do
-    get("/usage")
+    get(client(), "/usage")
     |> handle_response
   end
 
   def resource_types do
-    get("/resources")
+    get(client(), "/resources")
     |> handle_response
   end
 
@@ -34,8 +37,9 @@ defmodule Cloudinex do
       type ->
         "/resources/#{resource_type}/#{type}"
     end
+    Logger.info "url = #{url}"
 
-    get(url, query: options)
+    get(client(), url, query: options)
     |> handle_response
   end
 
@@ -44,7 +48,7 @@ defmodule Cloudinex do
 
     url = "/resources/#{resource_type}/tags/#{tag}"
 
-    get(url, query: options)
+    get(client(), url, query: options)
     |> handle_response
   end
 
@@ -52,24 +56,24 @@ defmodule Cloudinex do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
     url = case value do
-      nil -> 
+      nil ->
         "/resources/#{resource_type}/context/?key=#{context}"
-      value -> 
+      value ->
         "/resources/#{resource_type}/context/?key=#{context}&value=#{value}"
     end
 
-    get(url, query: options)
+    get(client(), url, query: options)
     |> handle_response
   end
 
-  
-  defp handle_response(%{status: 200, body: body, headers: headers}) do
-    IO.inspect headers
-    {:ok, body}
+  defp client() do
+    case Application.get_env(:cloudinex, :debug) do
+      true -> Tesla.build_client [{Tesla.Middleware.DebugLogger, %{}}]
+      _ -> Tesla.build_client []
+    end
   end
 
-  defp handle_response(%{status: status, body: body}) do
-    {:error, body}
+  defp base_url do
+    "#{Application.get_env(:cloudinex, :base_url)}#{Application.get_env(:cloudinex, :cloud_name)}"
   end
-
 end
