@@ -1,7 +1,7 @@
 defmodule CloudinexTest do
   @moduledoc false
   use ExUnit.Case
-  import Cloudinex.TestHelpers
+  import Cloudinex.TestHelper
 
   setup do
     bypass = Bypass.open

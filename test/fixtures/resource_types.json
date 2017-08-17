@@ -1,1 +1,5 @@
-{"resource_types":["image"]}
+{
+  "resource_types": [
+    "image"
+  ]
+}

@@ -31,7 +31,5 @@ defmodule Cloudinex.Helpers do
     {:error, "General Error: #{body}"}
   end
 
-  def handle_response(%{status: status, body: body}) do
-    {:error, body}
-  end
+  def handle_response(%{body: body}), do: {:error, body}
 end
