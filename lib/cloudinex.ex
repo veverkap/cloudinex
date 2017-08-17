@@ -37,22 +37,32 @@ defmodule Cloudinex do
 
     get(url, query: options)
     |> handle_response
-
-
-    # call_api(:get, uri, only(options, :next_cursor, :max_results, :prefix, :tags, :context, :moderations, :direction, :start_at), options)
   end
 
-  defp resources_default() do
-    [
-      context: false,
-      direction: "desc",
-      max_results: 10,
-      moderations: false,
-      resource_type: "image",
-      tags: false
-    ]
+  def resources_by_tag(tag, options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+
+    url = "/resources/#{resource_type}/tags/#{tag}"
+
+    get(url, query: options)
+    |> handle_response
   end
 
+  def resources_by_context(context, value \\ nil, options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+
+    url = case value do
+      nil -> 
+        "/resources/#{resource_type}/context/?key=#{context}"
+      value -> 
+        "/resources/#{resource_type}/context/?key=#{context}&value=#{value}"
+    end
+
+    get(url, query: options)
+    |> handle_response
+  end
+
+  
   defp handle_response(%{status: 200, body: body, headers: headers}) do
     IO.inspect headers
     {:ok, body}
