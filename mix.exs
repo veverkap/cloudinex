@@ -29,9 +29,11 @@ defmodule Cloudinex.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:hackney, "~> 1.6"},
+      {:hackney, "~> 1.9", override: true},
+      {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
       {:tesla, "~> 0.7.1"},
+
       {:credo, "> 0.0.0", only: :dev},
     ]
   end

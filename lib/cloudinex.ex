@@ -5,63 +5,61 @@ defmodule Cloudinex do
   plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
                                    password: Application.get_env(:cloudinex, :secret)
   plug Tesla.Middleware.FormUrlencoded
-  # plug Tesla.Middleware.JSON
-
+  plug Tesla.Middleware.JSON
+  plug Tesla.Middleware.DebugLogger
   adapter Tesla.Adapter.Hackney
 
- def resources(type) do
-    get("/resources/#{type}")
+  def ping do
+    get("/ping")
+    |> handle_response
   end
 
-  # def upload(url) do
-  #   opts \\ %{}opts \\ %{}
-  #   # post("/image/upload", "file=data")
-  #   # post("/image/upload")
-  # end
-
-
-  def upload_url(url, opts \\ %{}) do
-    params = opts
-          |> Map.merge(%{file: url})
-          |> prepare_opts
-          |> sign
-          |> URI.encode_query
-          |> IO.inspect
-
-      post("/image/upload", params)
+  def usage do
+    get("/usage")
+    |> handle_response
   end
 
-  defp prepare_opts(%{tags: tags} = opts) when is_list(tags), do: %{opts | tags: Enum.join(tags, ",")}
-  defp prepare_opts(opts), do: opts
-
-  defp sign(data) do
-    timestamp = current_time()
-
-    data_without_secret = data
-      |> Map.delete(:file)
-      |> Map.merge(%{"timestamp" => timestamp})
-      |> Enum.map(fn {key, val} -> "#{key}=#{val}" end)
-      |> Enum.sort
-      |> Enum.join("&")
-
-    signature = (data_without_secret <> Application.get_env(:cloudinex, :secret))
-      |> sha
-
-    Map.merge(data, %{
-      "timestamp" => timestamp,
-      "signature" => signature,
-      "api_key" => Application.get_env(:cloudinex, :api_key)
-    })
+  def resource_types do
+    get("/resources")
+    |> handle_response
   end
 
-  defp sha(query) do
-    :crypto.hash(:sha, query) |> Base.encode16 |> String.downcase
+  def resources(options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+    {type, options} = Keyword.pop(options, :type)
+
+    url = case type do
+      nil ->
+        "/resources/#{resource_type}"
+      type ->
+        "/resources/#{resource_type}/#{type}"
+    end
+
+    get(url, query: options)
+    |> handle_response
+
+
+    # call_api(:get, uri, only(options, :next_cursor, :max_results, :prefix, :tags, :context, :moderations, :direction, :start_at), options)
   end
 
-  defp current_time do
-    :os.system_time(:seconds)
-      |> round
-      |> Integer.to_string
+  defp resources_default() do
+    [
+      context: false,
+      direction: "desc",
+      max_results: 10,
+      moderations: false,
+      resource_type: "image",
+      tags: false
+    ]
+  end
+
+  defp handle_response(%{status: 200, body: body, headers: headers}) do
+    IO.inspect headers
+    {:ok, body}
+  end
+
+  defp handle_response(%{status: status, body: body}) do
+    {:error, body}
   end
 
 end
