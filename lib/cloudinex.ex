@@ -37,7 +37,6 @@ defmodule Cloudinex do
       type ->
         "/resources/#{resource_type}/#{type}"
     end
-    Logger.info "url = #{url}"
 
     get(client(), url, query: options)
     |> handle_response
@@ -47,6 +46,7 @@ defmodule Cloudinex do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
     url = "/resources/#{resource_type}/tags/#{tag}"
+    Logger.info url
 
     get(client(), url, query: options)
     |> handle_response
