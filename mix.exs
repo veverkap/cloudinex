@@ -7,7 +7,11 @@ defmodule Cloudinex.Mixfile do
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     name: "cloudinx",
+     source_url: "https://github.com/veverkap/cloudinex",
+     deps: deps(),
+     description: description(),
+     package: package()]
   end
 
   # Configuration for the OTP application
@@ -29,7 +33,6 @@ defmodule Cloudinex.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:hackney, "~> 1.9", override: true},
       {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
       {:tesla, github: "veverkap/tesla"},
@@ -37,7 +40,25 @@ defmodule Cloudinex.Mixfile do
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},
       {:ex_guard, "~> 1.2", only: :dev},
-      {:plug, "~> 1.4", only: [:dev, :test]}
+      {:plug, "~> 1.4", only: [:dev, :test]},
+      {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
+
+  defp description do
+    """
+    A few sentences (a paragraph) describing the project.
+    """
+  end
+
+  defp package do
+    # These are the default files included in the package
+    [
+      name: :cloudinex,
+      files: ["lib", "mix.exs", "README*"],
+      maintainers: ["Patrick Veverka"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/veverkap/cloudinex"}
+    ]
+  end  
 end
