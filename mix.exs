@@ -47,7 +47,7 @@ defmodule Cloudinex.Mixfile do
 
   defp description do
     """
-    A few sentences (a paragraph) describing the project.
+    Cloudinex is an Elixir library for the Cloudinary API
     """
   end
 

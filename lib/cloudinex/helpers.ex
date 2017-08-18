@@ -9,6 +9,22 @@ defmodule Cloudinex.Helpers do
     end)
   end
 
+  def join_list(nil), do: ""
+  def join_list(list), do: Enum.join(list, ",")
+
+  def map_context(nil), do: nil
+  def map_context(context) when is_map(context) do
+    context
+    |> Map.to_list
+    |> Enum.map_join("|", fn({a,b}) -> "#{a}=#{b}" end)
+  end
+
+  def map_coordinates(nil), do: nil
+  def map_coordinates(coordinates) when is_list(coordinates) do
+    coordinates
+    |> Enum.map_join("|", fn({a,b,c,d}) -> "#{a},#{b},#{c},#{d}" end)
+  end
+
   def prepare_opts(%{tags: tags} = opts) when is_list(tags), do: %{opts | tags: Enum.join(tags, ",")}
   def prepare_opts(opts), do: opts
 
