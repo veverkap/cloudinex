@@ -17,6 +17,8 @@ defmodule CloudinexTest do
     test "ping/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("ping")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/ping" == conn.request_path
+        assert "GET" == conn.method
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
@@ -27,6 +29,8 @@ defmodule CloudinexTest do
 
     test "ping/0 handles rate limit", %{bypass: bypass} do
       Bypass.expect bypass, fn conn ->
+        assert "/demo/ping" == conn.request_path
+        assert "GET" == conn.method        
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Limit", "500")
@@ -40,6 +44,8 @@ defmodule CloudinexTest do
 
     test "ping/0 invalid credentials", %{bypass: bypass} do
       Bypass.expect bypass, fn conn ->
+        assert "/demo/ping" == conn.request_path
+        assert "GET" == conn.method        
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Limit", "500")
@@ -56,6 +62,8 @@ defmodule CloudinexTest do
     test "usage/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("usage")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/usage" == conn.request_path
+        assert "GET" == conn.method        
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
@@ -69,6 +77,8 @@ defmodule CloudinexTest do
     test "resource_types/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("resource_types")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/resources" == conn.request_path
+        assert "GET" == conn.method        
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
@@ -82,6 +92,8 @@ defmodule CloudinexTest do
     test "resources/1 won't load bad resource name", %{bypass: bypass} do
       response = load_fixture("resources_images")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/images" == conn.request_path
+        assert "GET" == conn.method
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(400, response)
@@ -93,6 +105,8 @@ defmodule CloudinexTest do
     test "resources/1 loads image", %{bypass: bypass} do
       response = load_fixture("resources_image")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image" == conn.request_path
+        assert "GET" == conn.method        
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
@@ -104,19 +118,56 @@ defmodule CloudinexTest do
     test "resources/1 loads images of upload type", %{bypass: bypass} do
       response = load_fixture("resources_image_upload")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload" == conn.request_path
+        assert "GET" == conn.method          
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload")
       assert body == Poison.decode!(response)
+      Enum.each(body["resources"], fn(resource) ->
+        assert resource["type"] == "upload"
+      end)      
     end
+
+    test "resources/1 loads images of upload type with tags", %{bypass: bypass} do
+      response = load_fixture("resources_image_tags_apple_tags_true")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload" == conn.request_path
+        assert "tags=true" == conn.query_string
+        assert "GET" == conn.method          
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload", tags: true)
+      assert body == Poison.decode!(response)
+      Enum.each(body["resources"], fn(resource) ->
+        assert resource["tags"] == ["apple"]
+      end)
+    end  
+
+    test "resources/1 loads image and ignore bad keyword", %{bypass: bypass} do
+      response = load_fixture("resources_image")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image" == conn.request_path
+        assert "GET" == conn.method                  
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.resources(resource_type: "image", apple: "jo")
+      assert body == Poison.decode!(response)
+    end      
   end
 
   describe "resources_by_tag/2" do
     test "resources_by_tag/2 won't load bad resource name", %{bypass: bypass} do
       response = load_fixture("resources_images_tags_apple")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/images/tags/apple" == conn.request_path
+        assert "GET" == conn.method
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(400, response)
@@ -128,6 +179,8 @@ defmodule CloudinexTest do
     test "resources_by_tag/2 loads valid resource name", %{bypass: bypass} do
       response = load_fixture("resources_image_tags_apple")
       Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/tags/apple" == conn.request_path
+        assert "GET" == conn.method        
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
@@ -136,4 +189,48 @@ defmodule CloudinexTest do
       assert body == Poison.decode!(response)
     end
   end
+
+  describe "tags/1" do
+    test "usage/1 returns proper response", %{bypass: bypass} do
+      response = load_fixture("tags_image")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/tags/image" == conn.request_path
+        assert "GET" == conn.method        
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.tags(resource_type: "image")
+      assert body == Poison.decode!(response)
+    end
+
+    test "usage/1 with prefix returns proper response", %{bypass: bypass} do
+      response = load_fixture("tags_image_prefix_ap")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/tags/image" == conn.request_path
+        assert "prefix=ap" == conn.query_string
+        assert "GET" == conn.method           
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.tags(resource_type: "image", prefix: "ap")
+      assert body == Poison.decode!(response)
+    end    
+  end  
+
+  describe "resource/2" do
+    test "resource/2 returns proper response", %{bypass: bypass} do
+      response = load_fixture("resources_image_upload_bfch0noutwapaasvenin")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload/bfch0noutwapaasvenin" == conn.request_path
+        assert "GET" == conn.method           
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.resource("bfch0noutwapaasvenin", resource_type: "image")
+      assert body == Poison.decode!(response)
+    end
+  end    
 end

@@ -1,6 +1,6 @@
 defmodule Cloudinex do
   @moduledoc false
-  use Tesla
+  use Tesla, docs: false
   require Logger
   import Cloudinex.Helpers
 
@@ -38,6 +38,12 @@ defmodule Cloudinex do
         "/resources/#{resource_type}/#{type}"
     end
 
+    keys = [:prefix, :public_ids, :max_results, :next_cursor, :start_at, 
+            :direction, :tags, :context, :moderations]
+
+    options = options
+              |> Keyword.take(keys)
+
     get(client(), url, query: options)
     |> handle_response
   end
@@ -46,24 +52,85 @@ defmodule Cloudinex do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
     url = "/resources/#{resource_type}/tags/#{tag}"
-    Logger.info url
+
+    keys = [:max_results, :next_cursor, :direction, :tags, :context, :moderations]
+
+    options = options
+              |> Keyword.take(keys)
 
     get(client(), url, query: options)
     |> handle_response
   end
 
-  def resources_by_context(context, value \\ nil, options \\ []) do
+  def resources_by_context(key, value \\ nil, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
     url = case value do
       nil ->
-        "/resources/#{resource_type}/context/?key=#{context}"
+        "/resources/#{resource_type}/context/?key=#{key}"
       value ->
-        "/resources/#{resource_type}/context/?key=#{context}&value=#{value}"
+        "/resources/#{resource_type}/context/?key=#{key}&value=#{value}"
     end
+
+    keys = [:max_results, :next_cursor, :direction, :tags, :context]
+
+    options = options
+              |> Keyword.take(keys)
 
     get(client(), url, query: options)
     |> handle_response
+  end
+
+  def resources_by_moderation(type, status, options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+
+    valid_types = ["manual", "webpurify", "aws_rek", "metascan"]
+    valid_status = ["pending", "approved", "rejected"]
+
+    type = case Enum.member?(valid_types, type) do
+      true -> type
+      false -> "manual"
+    end
+
+    status = case Enum.member?(valid_status, status) do
+      true -> status
+      false -> "pending"
+    end
+
+    url = "/resources/#{resource_type}/moderations/#{type}/#{status}"
+
+    get(client(), url, query: options)
+    |> handle_response
+  end
+
+  def resource(public_id, options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+    {type, options} = Keyword.pop(options, :type, "upload")
+
+    url = "/resources/#{resource_type}/#{type}/#{public_id}"
+
+    keys = [:colors, :exif, :faces, :image_metadata, :pages, :phash, 
+            :coordinates, :max_results]
+
+    options = options
+              |> Keyword.take(keys)
+
+    get(client(), url, query: options)
+    |> handle_response
+  end
+
+  def tags(options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+
+    url = "/tags/#{resource_type}"
+
+    keys = [:prefix, :max_results, :next_cursor]
+
+    options = options
+              |> Keyword.take(keys)
+
+    get(client(), url, query: options)
+    |> handle_response    
   end
 
   defp client() do

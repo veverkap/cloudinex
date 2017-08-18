@@ -1,0 +1,18 @@
+{
+  "resources": [
+    {
+      "public_id": "bfch0noutwapaasvenin",
+      "format": "png",
+      "version": 1502891057,
+      "resource_type": "image",
+      "type": "upload",
+      "created_at": "2017-08-16T13:44:17Z",
+      "bytes": 624,
+      "width": 180,
+      "height": 180,
+      "url": "http://res.cloudinary.com/push-comedy-theater/image/upload/v1502891057/bfch0noutwapaasvenin.png",
+      "secure_url": "https://res.cloudinary.com/push-comedy-theater/image/upload/v1502891057/bfch0noutwapaasvenin.png"
+    }
+  ],
+  "next_cursor": "360269a037c87aec9f6443f3423dc125"
+}
