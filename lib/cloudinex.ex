@@ -3,11 +3,12 @@ defmodule Cloudinex do
   use Tesla, docs: false
   require Logger
   import Cloudinex.Helpers
+  import Cloudinex.Validation
 
   plug Tesla.Middleware.BaseUrl, base_url()
   plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
                                    password: Application.get_env(:cloudinex, :secret)
-  plug Tesla.Middleware.FormUrlencoded
+  # plug Tesla.Middleware.FormUrlencoded
   plug Tesla.Middleware.JSON
 
   adapter Tesla.Adapter.Hackney
@@ -130,88 +131,21 @@ defmodule Cloudinex do
             :categorization, :background_removal, :notification_url]
 
     options = options
-              |> Keyword.take(keys)
+              |> remove_invalid_keys(keys)
+              |> parse_keyword(:face_coordinates, &Cloudinex.Helpers.map_coordinates/1)
+              |> parse_keyword(:custom_coordinates, &Cloudinex.Helpers.map_coordinates/1)
+              |> parse_keyword(:tags, &Cloudinex.Helpers.join_list/1)
+              |> parse_keyword(:context, &Cloudinex.Helpers.map_context/1)
+              |> valid_member?(["approved", "rejected"], :moderation_status)
+              |> valid_member?(["remove_the_background", "pixelz"], :background_removal)
+              |> valid_option?(:detection, "adv_face")
+              |> valid_option?(:ocr, "adv_ocr")
+              |> valid_option?(:raw_convert, "aspose")
+              |> valid_option?(:categorization, "imagga_tagging")
+              |> valid_float_range?(:auto_tagging, 0.0, 1.0)
 
-    options = case options[:tags] do
-      nil ->
-        options
-      tags ->
-        Keyword.put(options, :tags, join_list(tags))
-    end
-
-    options = case options[:context] do
-      nil ->
-        options
-      context ->
-        Keyword.put(options, :context, map_context(context))
-    end    
-
-    options = case options[:face_coordinates] do
-      nil ->
-        options
-      face_coordinates ->
-        Keyword.put(options, :face_coordinates, map_coordinates(face_coordinates))
-    end   
-
-    options = case options[:custom_coordinates] do
-      nil ->
-        options
-      custom_coordinates ->
-        Keyword.put(options, :custom_coordinates, map_coordinates(custom_coordinates))
-    end  
-
-    options = case Enum.member?(["approved", "rejected"], options[:moderation_status]) do
-      true -> options
-      false -> Keyword.delete(options, :moderation_status)
-    end
-
-    options = case is_float(options[:auto_tagging]) and options[:auto_tagging] >= 0.0 and options[:auto_tagging] <= 1.0 do
-      true -> options
-      false -> Keyword.delete(options, :auto_tagging)
-    end
-
-    options = case options[:detection] == "adv_face" do
-      true -> options
-      false -> Keyword.delete(options, :detection)
-    end
-
-    options = case options[:ocr] == "adv_ocr" do
-      true -> options
-      false -> Keyword.delete(options, :ocr)
-    end    
-
-    options = case options[:raw_convert] == "aspose" do
-      true -> options
-      false -> Keyword.delete(options, :raw_convert)
-    end
-
-    options = case options[:categorization] == "imagga_tagging" do
-      true -> options
-      false -> Keyword.delete(options, :categorization)
-    end    
-
-    options = case Enum.member?(["remove_the_background", "pixelz"], options[:background_removal]) do
-      true -> options
-      false -> Keyword.delete(options, :background_removal)
-    end                
-#  update_options = {
-#       :moderation_status  => options[:moderation_status],
-#       :auto_tagging       => options[:auto_tagging] && options[:auto_tagging].to_f,
-# :detection          => options[:detection],
-#       :ocr                => options[:ocr],
-
-#       :raw_convert        => options[:raw_convert],
-#       :categorization     => options[:categorization],
-      
-#       :similarity_search  => options[:similarity_search],
-#       :background_removal => options[:background_removal],
-      
-#       :notification_url   => options[:notification_url]
-#     }
-
-    IO.inspect options
-    # get(client(), url, query: options)
-    # |> handle_response
+    post(client(), url, unify(options))
+    |> handle_response
   end
 
   def tags(options \\ []) do
