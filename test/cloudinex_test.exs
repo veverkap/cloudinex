@@ -75,7 +75,7 @@ defmodule CloudinexTest do
 
   describe "resource_types/0" do
     test "resource_types/0 returns proper response", %{bypass: bypass} do
-      response = load_fixture("resource_types")
+      response = load_fixture("resources/types")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources" == conn.request_path
         assert "GET" == conn.method        
@@ -90,7 +90,7 @@ defmodule CloudinexTest do
 
   describe "resources/1" do
     test "resources/1 won't load bad resource name", %{bypass: bypass} do
-      response = load_fixture("resources_images")
+      response = load_fixture("resources/images")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/images" == conn.request_path
         assert "GET" == conn.method
@@ -103,7 +103,7 @@ defmodule CloudinexTest do
     end
 
     test "resources/1 loads image", %{bypass: bypass} do
-      response = load_fixture("resources_image")
+      response = load_fixture("resources/image")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image" == conn.request_path
         assert "GET" == conn.method        
@@ -116,7 +116,7 @@ defmodule CloudinexTest do
     end
 
     test "resources/1 loads images of upload type", %{bypass: bypass} do
-      response = load_fixture("resources_image_upload")
+      response = load_fixture("resources/image/upload")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "GET" == conn.method          
@@ -132,7 +132,7 @@ defmodule CloudinexTest do
     end
 
     test "resources/1 loads images of upload type with tags", %{bypass: bypass} do
-      response = load_fixture("resources_image_tags_apple_tags_true")
+      response = load_fixture("resources/image/tags/apple/tags_true")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "tags=true" == conn.query_string
@@ -149,7 +149,7 @@ defmodule CloudinexTest do
     end  
 
     test "resources/1 loads image and ignore bad keyword", %{bypass: bypass} do
-      response = load_fixture("resources_image")
+      response = load_fixture("resources/image")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image" == conn.request_path
         assert "GET" == conn.method                  
@@ -164,7 +164,7 @@ defmodule CloudinexTest do
 
   describe "resources_by_tag/2" do
     test "resources_by_tag/2 won't load bad resource name", %{bypass: bypass} do
-      response = load_fixture("resources_images_tags_apple")
+      response = load_fixture("resources/images/tags/apple")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/images/tags/apple" == conn.request_path
         assert "GET" == conn.method
@@ -177,7 +177,7 @@ defmodule CloudinexTest do
     end
 
     test "resources_by_tag/2 loads valid resource name", %{bypass: bypass} do
-      response = load_fixture("resources_image_tags_apple")
+      response = load_fixture("resources/image/tags/apple")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image/tags/apple" == conn.request_path
         assert "GET" == conn.method        
@@ -192,7 +192,7 @@ defmodule CloudinexTest do
 
   describe "tags/1" do
     test "usage/1 returns proper response", %{bypass: bypass} do
-      response = load_fixture("tags_image")
+      response = load_fixture("tags/image")
       Bypass.expect bypass, fn conn ->
         assert "/demo/tags/image" == conn.request_path
         assert "GET" == conn.method        
@@ -205,7 +205,7 @@ defmodule CloudinexTest do
     end
 
     test "usage/1 with prefix returns proper response", %{bypass: bypass} do
-      response = load_fixture("tags_image_prefix_ap")
+      response = load_fixture("tags/image/prefix_ap")
       Bypass.expect bypass, fn conn ->
         assert "/demo/tags/image" == conn.request_path
         assert "prefix=ap" == conn.query_string
@@ -221,7 +221,7 @@ defmodule CloudinexTest do
 
   describe "resource/2" do
     test "resource/2 returns proper response", %{bypass: bypass} do
-      response = load_fixture("resources_image_upload_bfch0noutwapaasvenin")
+      response = load_fixture("resources/image/upload/bfch0noutwapaasvenin")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image/upload/bfch0noutwapaasvenin" == conn.request_path
         assert "GET" == conn.method           
@@ -230,6 +230,53 @@ defmodule CloudinexTest do
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resource("bfch0noutwapaasvenin", resource_type: "image")
+      assert body == Poison.decode!(response)
+    end
+  end  
+
+  describe "update_resource/2" do
+    test "update_resource/2 returns proper response", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/bfch0noutwapaasvenin")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload/bfch0noutwapaasvenin" == conn.request_path
+        assert "POST" == conn.method           
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.update_resource("bfch0noutwapaasvenin", tags: ["cinammon"])
+      assert body == Poison.decode!(response)
+    end
+  end  
+
+  describe "delete_resource/2" do
+    test "delete_resource/2 returns proper response", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/bfch0noutwapaasvenin/delete")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload" == conn.request_path
+        assert "DELETE" == conn.method     
+        assert "public_ids=bfch0noutwapaasvenin" == conn.query_string
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.delete_resource("bfch0noutwapaasvenin")
+      assert body == Poison.decode!(response)
+    end
+  end
+
+  describe "delete_resources/2" do
+    test "delete_resources/2 returns proper response", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload" == conn.request_path
+        assert "DELETE" == conn.method     
+        assert "public_ids=bfch0noutwapaasvenin%2Cdude" == conn.query_string
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.delete_resources(["bfch0noutwapaasvenin", "dude"])
       assert body == Poison.decode!(response)
     end
   end    

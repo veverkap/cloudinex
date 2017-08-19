@@ -1,6 +1,6 @@
 defmodule Cloudinex do
   @moduledoc false
-  use Tesla, docs: false
+  use Tesla
   require Logger
   import Cloudinex.Helpers
   import Cloudinex.Validation
@@ -148,6 +148,16 @@ defmodule Cloudinex do
     |> handle_response
   end
 
+  def restore(public_ids, options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+    {type, _options} = Keyword.pop(options, :type, "upload")
+
+    url = "/resources/#{resource_type}/#{type}/restore"
+
+    post(client(), url, %{public_ids: public_ids})
+    |> handle_response
+  end
+
   def tags(options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
@@ -160,6 +170,19 @@ defmodule Cloudinex do
 
     get(client(), url, query: options)
     |> handle_response    
+  end
+
+  def delete_resource(public_id, options \\ []), do: delete_resources(public_id, options)
+  def delete_resources(public_ids, options \\ [])
+  def delete_resources(public_ids, options) when is_list(public_ids), do: delete_resources(join_list(public_ids), options)
+  def delete_resources(public_ids, options) when is_binary(public_ids) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+    {type, _options} = Keyword.pop(options, :type, "upload")
+
+    url = "/resources/#{resource_type}/#{type}"
+
+    request(method: :delete, url: url, query: [public_ids: public_ids])
+    |> handle_response
   end
 
   defp client() do

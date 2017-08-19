@@ -1,0 +1,27 @@
+{
+    "public_id": "bfch0noutwapaasvenin",
+    "format": "png",
+    "version": 1502891057,
+    "resource_type": "image",
+    "type": "upload",
+    "created_at": "2017-08-16T13:44:17Z",
+    "bytes": 624,
+    "width": 180,
+    "height": 180,
+    "url": "http://res.cloudinary.com/push-comedy-theater/image/upload/v1502891057/bfch0noutwapaasvenin.png",
+    "secure_url": "https://res.cloudinary.com/push-comedy-theater/image/upload/v1502891057/bfch0noutwapaasvenin.png",
+    "tags": [
+        "apple"
+    ],
+    "next_cursor": "33a33bec2f7ef2047b791d076efbde06",
+    "derived": [
+        {
+            "transformation": "t_media_lib_thumb",
+            "format": "png",
+            "bytes": 294,
+            "id": "59f0ed99f0991925a51f0fe3712974e9",
+            "url": "http://res.cloudinary.com/push-comedy-theater/image/upload/t_media_lib_thumb/v1502891057/bfch0noutwapaasvenin.png",
+            "secure_url": "https://res.cloudinary.com/push-comedy-theater/image/upload/t_media_lib_thumb/v1502891057/bfch0noutwapaasvenin.png"
+        }
+    ]
+}
