@@ -39,7 +39,7 @@ defmodule Cloudinex do
         "/resources/#{resource_type}/#{type}"
     end
 
-    keys = [:prefix, :public_ids, :max_results, :next_cursor, :start_at, 
+    keys = [:prefix, :public_ids, :max_results, :next_cursor, :start_at,
             :direction, :tags, :context, :moderations]
 
     options = options
@@ -110,7 +110,7 @@ defmodule Cloudinex do
 
     url = "/resources/#{resource_type}/#{type}/#{public_id}"
 
-    keys = [:colors, :exif, :faces, :image_metadata, :pages, :phash, 
+    keys = [:colors, :exif, :faces, :image_metadata, :pages, :phash,
             :coordinates, :max_results]
 
     options = options
@@ -126,7 +126,7 @@ defmodule Cloudinex do
 
     url = "/resources/#{resource_type}/#{type}/#{public_id}"
 
-    keys = [:tags, :context, :face_coordinates, :custom_coordinates, 
+    keys = [:tags, :context, :face_coordinates, :custom_coordinates,
             :moderation_status, :auto_tagging, :detection, :ocr, :raw_convert,
             :categorization, :background_removal, :notification_url]
 
@@ -158,6 +158,56 @@ defmodule Cloudinex do
     |> handle_response
   end
 
+  def delete_resource(public_id, options \\ []) when is_binary(public_id),
+    do: delete_resources(%{public_ids: [public_id]}, options)
+
+  def delete_derived_resources(derived_resource_ids, options \\ []) do
+    query = [derived_resource_ids: derived_resource_ids]
+          |> Keyword.merge(options)
+
+    url = "/derived_resources"
+    request(method: :delete, url: url, query: query)
+    |> handle_response
+  end
+
+  def delete_resources_by_prefix(prefix, options \\ []) when is_binary(prefix),
+    do: delete_resources(%{prefix: prefix}, options)
+  def delete_all_resources(options \\ []),
+    do: delete_resources(%{all: true}, options)
+  def delete_resources_by_tag(tag, options \\ []),
+    do: delete_resources(%{tag: tag}, options)
+
+  def delete_resources(hash, options \\ [])
+  def delete_resources(%{public_ids: public_ids}, options) when is_list(public_ids),
+    do: delete_resources(%{public_ids: join_list(public_ids)}, options)
+  def delete_resources(%{public_ids: public_ids}, options) when is_binary(public_ids),
+    do: call_delete(options, [public_ids: public_ids])
+  def delete_resources(%{prefix: prefix}, options) when is_binary(prefix),
+    do: call_delete(options, [prefix: prefix])
+  def delete_resources(%{all: true}, options),
+    do: call_delete(options, [all: true])
+  def delete_resources(%{tag: tag}, options),
+    do: call_delete(options, [tag: tag])
+
+  defp call_delete(options, query) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+    {type, options} = Keyword.pop(options, :type, "upload")
+    {tag, query} = Keyword.pop(query, :tag)
+
+    keys = [:keep_original, :next_cursor, :invalidate, :transformations]
+    query = options
+            |> remove_invalid_keys(keys)
+            |> Keyword.merge(query)
+
+    url = case tag do
+      nil -> "/resources/#{resource_type}/#{type}"
+      tag -> "/resources/#{resource_type}/tags/#{tag}"
+    end
+
+    request(method: :delete, url: url, query: query)
+    |> handle_response
+  end
+
   def tags(options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
@@ -169,23 +219,34 @@ defmodule Cloudinex do
               |> Keyword.take(keys)
 
     get(client(), url, query: options)
-    |> handle_response    
-  end
-
-  def delete_resource(public_id, options \\ []), do: delete_resources(public_id, options)
-  def delete_resources(public_ids, options \\ [])
-  def delete_resources(public_ids, options) when is_list(public_ids), do: delete_resources(join_list(public_ids), options)
-  def delete_resources(public_ids, options) when is_binary(public_ids) do
-    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
-    {type, _options} = Keyword.pop(options, :type, "upload")
-
-    url = "/resources/#{resource_type}/#{type}"
-
-    request(method: :delete, url: url, query: [public_ids: public_ids])
     |> handle_response
   end
 
-  defp client() do
+  def transformations(options \\ []) do
+    url = "/transformations"
+
+    keys = [:max_results, :next_cursor]
+
+    options = options
+              |> Keyword.take(keys)
+
+    get(client(), url, query: options)
+    |> handle_response
+  end
+
+  def transformation(id, options \\ []) do
+    url = "/transformation/#{id}"
+
+    keys = [:max_results, :next_cursor]
+
+    options = options
+              |> Keyword.take(keys)
+
+    get(client(), url, query: options)
+    |> handle_response
+  end
+
+  defp client do
     case Application.get_env(:cloudinex, :debug) do
       true -> Tesla.build_client [{Tesla.Middleware.DebugLogger, %{}}]
       _ -> Tesla.build_client []
