@@ -1,4 +1,6 @@
 # Cloudinex
+[![CircleCI](https://circleci.com/gh/veverkap/cloudinex/tree/master.svg?style=svg&circle-token=e6113d078cbf6f2a86aeb9b540f52d6fd9b2df04)](https://circleci.com/gh/veverkap/cloudinex/tree/master)
+
 
 **TODO: Add description**
 
