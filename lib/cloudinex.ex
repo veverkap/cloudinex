@@ -153,7 +153,7 @@ defmodule Cloudinex do
               |> valid_float_range?(:auto_tagging, 0.0, 1.0)
 
     client()
-    |> post(url,  Helpers.unify(options))
+    |> post(url, Helpers.unify(options))
     |> Helpers.handle_response
   end
 
@@ -267,6 +267,69 @@ defmodule Cloudinex do
 
     client()
     |> delete(url, query: options)
+    |> Helpers.handle_response
+  end
+
+  def update_transformation(id, options \\ []) do
+    url = "/transformations/#{id}"
+
+    client()
+    |> request(method: :put, url: url, query: options)
+    |> Helpers.handle_response
+  end
+
+  def create_transformation(name, transformation) do
+    url = "/transformations/#{name}"
+
+    client()
+    |> post(url, %{transformation: transformation})
+    |> Helpers.handle_response
+  end
+
+  def upload_mappings(options \\ []) do
+    url = "/upload_mappings"
+
+    keys = [:max_results, :next_cursor]
+
+    options = options
+              |> Keyword.take(keys)
+
+    client()
+    |> get(url, query: options)
+    |> Helpers.handle_response
+  end
+
+  def upload_mapping(folder) do
+    url = "/upload_mappings/#{folder}"
+
+    client()
+    |> get(url)
+    |> Helpers.handle_response
+  end
+
+  def create_upload_mapping(folder, template) do
+    url = "/upload_mappings"
+
+    client()
+    |> post(url, %{folder: folder, template: template})
+    |> Helpers.handle_response
+  end
+
+  def delete_upload_mapping(folder) do
+    url = "/upload_mappings/#{folder}"
+
+    client()
+    |> delete(url)
+    |> Helpers.handle_response
+  end
+
+  def update_upload_mapping(folder, template) do
+    url = "/upload_mappings"
+
+    query = %{folder: folder, template: template}
+
+    client()
+    |> request(method: :put, url: url, query: query)
     |> Helpers.handle_response
   end
 

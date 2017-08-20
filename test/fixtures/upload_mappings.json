@@ -1,0 +1,8 @@
+{
+    "mappings": [
+        {
+            "folder": "my_map",
+            "template": "http://www.example.com/images/"
+        }
+    ]
+}
