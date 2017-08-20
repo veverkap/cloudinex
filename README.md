@@ -2,6 +2,7 @@
 [![CircleCI](https://circleci.com/gh/veverkap/cloudinex/tree/master.svg?style=svg&circle-token=e6113d078cbf6f2a86aeb9b540f52d6fd9b2df04)](https://circleci.com/gh/veverkap/cloudinex/tree/master)
 [![Build Status](https://travis-ci.org/veverkap/cloudinex.svg?branch=master)](https://travis-ci.org/veverkap/cloudinex)
 [![Hex.pm](https://img.shields.io/hexpm/v/cloudinex.svg)](http://hex.pm/packages/cloudinex)
+[ ![Codeship Status for veverkap/cloudinex](https://app.codeship.com/projects/92f66fd0-676b-0135-d1a2-52d2c2f6a252/status?branch=master)](https://app.codeship.com/projects/241057)
 
 **TODO: Add description**
 
