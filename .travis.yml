@@ -12,3 +12,4 @@ install:
   - mix compile
 env:
   - MIX_ENV=test
+script: mix coveralls.travis  

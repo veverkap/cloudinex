@@ -9,6 +9,8 @@ defmodule Cloudinex.Mixfile do
      start_permanent: Mix.env == :prod,
      name: "cloudinx",
      source_url: "https://github.com/veverkap/cloudinex",
+     test_coverage: [tool: ExCoveralls],
+     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
      deps: deps(),
      description: description(),
      package: package()]
@@ -39,9 +41,11 @@ defmodule Cloudinex.Mixfile do
 
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},
+      {:excoveralls, "~> 0.7", only: :test},
+      {:ex_doc, ">= 0.0.0", only: :dev},
       {:ex_guard, "~> 1.2", only: :dev},
       {:plug, "~> 1.4", only: [:dev, :test]},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      
     ]
   end
 
