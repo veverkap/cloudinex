@@ -4,5 +4,11 @@ elixir:
   - 1.5.0
 otp_release:
   - 19.3
-  - 20
+  - 20.0
 sudo: false
+install:
+  - mix do local.hex --force, local.rebar --force
+  - mix deps.get # need to explicitly get test deps, see mix.exs
+  - mix compile
+env:
+  - MIX_ENV=test
