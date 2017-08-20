@@ -2,7 +2,7 @@ defmodule Cloudinex do
   @moduledoc false
   use Tesla
   require Logger
-  import Cloudinex.Helpers
+  alias Cloudinex.Helpers
   import Cloudinex.Validation
 
   plug Tesla.Middleware.BaseUrl, base_url()
@@ -16,19 +16,19 @@ defmodule Cloudinex do
   def ping do
     client()
     |> get("/ping")
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def usage do
     client()
     |> get("/usage")
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def resource_types do
     client()
     |> get("/resources")
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def resources(options \\ []) do
@@ -50,7 +50,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def resources_by_tag(tag, options \\ []) do
@@ -65,7 +65,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def resources_by_context(key, value \\ nil, options \\ []) do
@@ -85,7 +85,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def resources_by_moderation(type, status, options \\ []) do
@@ -108,7 +108,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def resource(public_id, options \\ []) do
@@ -125,7 +125,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def update_resource(public_id, options \\ []) do
@@ -140,10 +140,10 @@ defmodule Cloudinex do
 
     options = options
               |> remove_invalid_keys(keys)
-              |> parse_keyword(:face_coordinates, &Cloudinex.Helpers.map_coordinates/1)
-              |> parse_keyword(:custom_coordinates, &Cloudinex.Helpers.map_coordinates/1)
-              |> parse_keyword(:tags, &Cloudinex.Helpers.join_list/1)
-              |> parse_keyword(:context, &Cloudinex.Helpers.map_context/1)
+              |> parse_keyword(:face_coordinates, &Helpers.map_coordinates/1)
+              |> parse_keyword(:custom_coordinates, &Helpers.map_coordinates/1)
+              |> parse_keyword(:tags, &Helpers.join_list/1)
+              |> parse_keyword(:context, &Helpers.map_context/1)
               |> valid_member?(["approved", "rejected"], :moderation_status)
               |> valid_member?(["remove_the_background", "pixelz"], :background_removal)
               |> valid_option?(:detection, "adv_face")
@@ -153,8 +153,8 @@ defmodule Cloudinex do
               |> valid_float_range?(:auto_tagging, 0.0, 1.0)
 
     client()
-    |> post(url, unify(options))
-    |> handle_response
+    |> post(url,  Helpers.unify(options))
+    |> Helpers.handle_response
   end
 
   def restore(public_ids, options \\ []) do
@@ -165,7 +165,7 @@ defmodule Cloudinex do
 
     client()
     |> post(url, %{public_ids: public_ids})
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def delete_resource(public_id, options \\ []) when is_binary(public_id),
@@ -179,7 +179,7 @@ defmodule Cloudinex do
 
     client()
     |> request(method: :delete, url: url, query: query)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def delete_resources_by_prefix(prefix, options \\ []) when is_binary(prefix),
@@ -191,7 +191,7 @@ defmodule Cloudinex do
 
   def delete_resources(hash, options \\ [])
   def delete_resources(%{public_ids: public_ids}, options) when is_list(public_ids),
-    do: delete_resources(%{public_ids: join_list(public_ids)}, options)
+    do: delete_resources(%{public_ids:  Helpers.join_list(public_ids)}, options)
   def delete_resources(%{public_ids: public_ids}, options) when is_binary(public_ids),
     do: call_delete(options, [public_ids: public_ids])
   def delete_resources(%{prefix: prefix}, options) when is_binary(prefix),
@@ -218,7 +218,7 @@ defmodule Cloudinex do
 
     client()
     |> request(method: :delete, url: url, query: query)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def tags(options \\ []) do
@@ -233,7 +233,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def transformations(options \\ []) do
@@ -246,7 +246,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def transformation(id, options \\ []) do
@@ -259,7 +259,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   def delete_transformation(id, options \\ []) do
@@ -267,7 +267,7 @@ defmodule Cloudinex do
 
     client()
     |> delete(url, query: options)
-    |> handle_response
+    |> Helpers.handle_response
   end
 
   defp client do
