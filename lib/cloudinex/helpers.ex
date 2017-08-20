@@ -1,7 +1,6 @@
 defmodule Cloudinex.Helpers do
   @moduledoc false
-  #  Unifies hybrid map into string-only key map.
-  #  ie. `%{a: 1, "b" => 2} => %{"a" => 1, "b" => 2}`
+  def unify(nil), do: nil
   def unify(data) do
     data
     |> Enum.reduce(%{}, fn {k, v}, acc ->
@@ -16,13 +15,13 @@ defmodule Cloudinex.Helpers do
   def map_context(context) when is_map(context) do
     context
     |> Map.to_list
-    |> Enum.map_join("|", fn({a,b}) -> "#{a}=#{b}" end)
+    |> Enum.map_join("|", fn({a, b}) -> "#{a}=#{b}" end)
   end
 
   def map_coordinates(nil), do: nil
   def map_coordinates(coordinates) when is_list(coordinates) do
     coordinates
-    |> Enum.map_join("|", fn({a,b,c,d}) -> "#{a},#{b},#{c},#{d}" end)
+    |> Enum.map_join("|", fn({a, b, c, d}) -> "#{a},#{b},#{c},#{d}" end)
   end
 
   def prepare_opts(%{tags: tags} = opts) when is_list(tags), do: %{opts | tags: Enum.join(tags, ",")}

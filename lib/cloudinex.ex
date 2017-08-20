@@ -14,17 +14,20 @@ defmodule Cloudinex do
   adapter Tesla.Adapter.Hackney
 
   def ping do
-    get(client(), "/ping")
+    client()
+    |> get("/ping")
     |> handle_response
   end
 
   def usage do
-    get(client(), "/usage")
+    client()
+    |> get("/usage")
     |> handle_response
   end
 
   def resource_types do
-    get(client(), "/resources")
+    client()
+    |> get("/resources")
     |> handle_response
   end
 
@@ -45,7 +48,8 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -59,7 +63,8 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -78,7 +83,8 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -100,7 +106,8 @@ defmodule Cloudinex do
 
     url = "/resources/#{resource_type}/moderations/#{type}/#{status}"
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -116,7 +123,8 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -144,7 +152,8 @@ defmodule Cloudinex do
               |> valid_option?(:categorization, "imagga_tagging")
               |> valid_float_range?(:auto_tagging, 0.0, 1.0)
 
-    post(client(), url, unify(options))
+    client()
+    |> post(url, unify(options))
     |> handle_response
   end
 
@@ -154,7 +163,8 @@ defmodule Cloudinex do
 
     url = "/resources/#{resource_type}/#{type}/restore"
 
-    post(client(), url, %{public_ids: public_ids})
+    client()
+    |> post(url, %{public_ids: public_ids})
     |> handle_response
   end
 
@@ -166,7 +176,9 @@ defmodule Cloudinex do
           |> Keyword.merge(options)
 
     url = "/derived_resources"
-    request(method: :delete, url: url, query: query)
+
+    client()
+    |> request(method: :delete, url: url, query: query)
     |> handle_response
   end
 
@@ -204,7 +216,8 @@ defmodule Cloudinex do
       tag -> "/resources/#{resource_type}/tags/#{tag}"
     end
 
-    request(client(), method: :delete, url: url, query: query)
+    client()
+    |> request(method: :delete, url: url, query: query)
     |> handle_response
   end
 
@@ -218,7 +231,8 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -230,7 +244,8 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
@@ -242,14 +257,16 @@ defmodule Cloudinex do
     options = options
               |> Keyword.take(keys)
 
-    get(client(), url, query: options)
+    client()
+    |> get(url, query: options)
     |> handle_response
   end
 
   def delete_transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
-    delete(client(), url, query: options)
+    client()
+    |> delete(url, query: options)
     |> handle_response
   end
 
