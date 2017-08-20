@@ -48,7 +48,7 @@ defmodule Cloudinex.Mixfile do
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:ex_guard, "~> 1.2", only: :dev},
       {:plug, "~> 1.4", only: [:dev, :test]},
-      
+      {:inch_ex, only: :docs},
     ]
   end
 
@@ -67,5 +67,5 @@ defmodule Cloudinex.Mixfile do
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/veverkap/cloudinex"}
     ]
-  end  
+  end
 end

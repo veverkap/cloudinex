@@ -1,5 +1,5 @@
 language: elixir
-elixir:  
+elixir:
   - 1.4.5
   - 1.5.1
 otp_release:
@@ -12,4 +12,7 @@ install:
   - mix compile
 env:
   - MIX_ENV=test
-script: mix coveralls.travis  
+script: mix coveralls.travis
+after_script:
+  - mix deps.get --only docs
+  - MIX_ENV=docs mix inch.report
