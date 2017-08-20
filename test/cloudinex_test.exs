@@ -413,9 +413,9 @@ defmodule CloudinexTest do
 
   describe "transformation/1" do
     test "transformation/1 returns proper response", %{bypass: bypass} do
-      response = load_fixture("transformation/c_crop,h_404,w_582,x_0,y_546")
+      response = load_fixture("transformations/c_crop,h_404,w_582,x_0,y_546")
       Bypass.expect bypass, fn conn ->
-        assert "/demo/transformation/c_crop,h_404,w_582,x_0,y_546" == conn.request_path
+        assert "/demo/transformations/c_crop,h_404,w_582,x_0,y_546" == conn.request_path
         assert "GET" == conn.method
         conn
         |> Plug.Conn.put_resp_header("content-type", "application/json")
@@ -426,9 +426,9 @@ defmodule CloudinexTest do
     end
 
     test "transformations/1 with max_result returns proper response", %{bypass: bypass} do
-      response = load_fixture("transformation/c_crop,h_404,w_582,x_0,y_546")
+      response = load_fixture("transformations/c_crop,h_404,w_582,x_0,y_546")
       Bypass.expect bypass, fn conn ->
-        assert "/demo/transformation/c_crop,h_404,w_582,x_0,y_546" == conn.request_path
+        assert "/demo/transformations/c_crop,h_404,w_582,x_0,y_546" == conn.request_path
         assert "max_results=20" == conn.query_string
         assert "GET" == conn.method
         conn
@@ -439,4 +439,19 @@ defmodule CloudinexTest do
       assert body == Poison.decode!(response)
     end
   end
+
+  describe "delete_transformation/1" do
+    test "delete_transformation/1 returns proper response", %{bypass: bypass} do
+      response = load_fixture("transformations/delete")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/transformations/c_crop,h_404,w_582,x_0,y_546" == conn.request_path
+        assert "DELETE" == conn.method
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.delete_transformation("c_crop,h_404,w_582,x_0,y_546")
+      assert body == Poison.decode!(response)
+    end
+  end  
 end
