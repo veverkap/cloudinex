@@ -3,7 +3,7 @@ defmodule Cloudinex.Mixfile do
 
   def project do
     [app: :cloudinex,
-     version: "0.1.0",
+     version: "0.1.1",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -12,7 +12,7 @@ defmodule Cloudinex.Mixfile do
      source_url: "https://github.com/veverkap/cloudinex",
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
-     deps: deps(),
+     deps: deps(Mix.env),
      description: description(),
      package: package()]
   end
@@ -48,9 +48,10 @@ defmodule Cloudinex.Mixfile do
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:ex_guard, "~> 1.2", only: :dev},
       {:plug, "~> 1.4", only: [:dev, :test]},
-      {:inch_ex, only: :docs},
     ]
   end
+
+  defp deps(_), do: deps()
 
   defp description do
     """

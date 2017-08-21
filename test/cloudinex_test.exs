@@ -357,6 +357,7 @@ defmodule CloudinexTest do
 
   describe "restore" do
     test "restore loads correct url", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/bfch0noutwapaasvenin/restore")
       Bypass.expect bypass, fn conn ->
         assert "/demo/resources/image/upload/restore" == conn.request_path
         assert "POST" == conn.method
