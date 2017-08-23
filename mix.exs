@@ -3,12 +3,12 @@ defmodule Cloudinex.Mixfile do
 
   def project do
     [app: :cloudinex,
-     version: "0.1.1",
-     elixir: "~> 1.4",
+     version: "0.2.0",
+     elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      elixirc_paths: elixirc_paths(Mix.env),
-     name: "cloudinx",
+     name: "cloudinex",
      source_url: "https://github.com/veverkap/cloudinex",
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
