@@ -244,6 +244,34 @@ defmodule Cloudinex.ResourceTest do
     end
   end
 
+  describe "update_access_mode_by_public_ids/3" do
+    test "update_access_mode_by_public_ids/3 returns proper response", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/update_access_mode")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
+        assert "PUT" == conn.method
+        assert "public_ids%5B%5D=bfch0noutwapaasvenin&access_mode=public" == conn.query_string
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin"], "public")
+    end
+
+    test "update_access_mode_by_public_ids/3 returns proper response for multiples", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/update_access_mode")
+      Bypass.expect bypass, fn conn ->
+        assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
+        assert "PUT" == conn.method
+        assert "public_ids%5B%5D=bfch0noutwapaasvenin&public_ids%5B%5D=abcsd&access_mode=public" == conn.query_string
+        conn
+        |> Plug.Conn.put_resp_header("content-type", "application/json")
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, body} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin", "abcsd"], "public")
+    end
+  end
+
   describe "restore" do
     test "restore loads correct url", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin/restore")

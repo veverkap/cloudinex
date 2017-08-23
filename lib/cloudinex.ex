@@ -333,6 +333,67 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  def update_access_mode_by_public_ids(public_ids, access_mode, options \\ []) do
+    {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+
+    url = "/resources/#{resource_type}/upload/update_access_mode"
+
+    keys = [:public_ids, :access_mode, :next_cursor]
+
+
+    options = options
+              |> Keyword.merge([public_ids: public_ids, access_mode: access_mode])
+              |> remove_invalid_keys(keys)
+              |> valid_member?(["public", "authenticated"], :access_mode)
+
+    client()
+    |> request(method: :put, url: url, query: options)
+    |> Helpers.handle_response
+  end
+
+  def upload_presets(options \\ []) do
+    url = "/upload_presets"
+
+    client()
+    |> get(url, query: options)
+    |> Helpers.handle_response()
+  end
+
+  def upload_preset(preset_name) do
+    url = "/upload_presets/#{preset_name}"
+
+    client()
+    |> get(url)
+    |> Helpers.handle_response()
+  end
+
+  def create_upload_preset(name, unsigned, disallow_public_id, settings \\ []) do
+    url = "/upload_presets"
+
+    settings = settings
+               |> Keyword.merge([name: name, unsigned: unsigned,
+                                 disallow_public_id: disallow_public_id])
+    client()
+    |> post(url, Helpers.unify(settings))
+    |> Helpers.handle_response
+  end
+
+  def update_upload_preset(name, settings \\ []) do
+    url = "/upload_presets/#{name}"
+
+    client()
+    |> request(method: :put, url: url, query: settings)
+    |> Helpers.handle_response
+  end
+
+  def delete_upload_preset(id, options \\ []) do
+    url = "/upload_presets/#{id}"
+
+    client()
+    |> delete(url, query: options)
+    |> Helpers.handle_response
+  end
+
   defp client do
     case Application.get_env(:cloudinex, :debug) do
       true -> Tesla.build_client [{Tesla.Middleware.DebugLogger, %{}}]
