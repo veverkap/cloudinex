@@ -1,6 +1,5 @@
 defmodule Cloudinex do
-  @moduledoc false
-  use Tesla
+  use Tesla, docs: false
   require Logger
   alias Cloudinex.Helpers
   import Cloudinex.Validation
@@ -13,12 +12,18 @@ defmodule Cloudinex do
 
   adapter Tesla.Adapter.Hackney
 
+  @doc """
+  Pings the Cloudinary endpoints
+  """
   def ping do
     client()
     |> get("/ping")
     |> Helpers.handle_response
   end
 
+  @doc """
+  Returns information about account usage
+  """
   def usage do
     client()
     |> get("/usage")
