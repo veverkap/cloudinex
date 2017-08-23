@@ -394,6 +394,22 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  def folders do
+    url = "/folders"
+
+    client()
+    |> get(url)
+    |> Helpers.handle_response
+  end
+
+  def folders(root_folder) do
+    url = "/folders/#{root_folder}"
+
+    client()
+    |> get(url)
+    |> Helpers.handle_response
+  end
+
   defp client do
     case Application.get_env(:cloudinex, :debug) do
       true -> Tesla.build_client [{Tesla.Middleware.DebugLogger, %{}}]
