@@ -72,7 +72,7 @@ defmodule Cloudinex.Middleware do
   def log_body(stream, prefix) when is_function(stream), do: log_body_stream(stream, prefix)
   def log_body(data, prefix) when is_binary(data) or is_list(data) do
     _ = Logger.debug ""
-    _ = Logger.debug prefix <> to_string(data)
+    _ = Logger.debug "#{prefix} #{inspect data}"
     data
   end
   def log_body(data, prefix) when is_map(data) do
