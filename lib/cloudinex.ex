@@ -8,6 +8,7 @@ defmodule Cloudinex do
   plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
                                    password: Application.get_env(:cloudinex, :secret)
   # plug Tesla.Middleware.FormUrlencoded
+  plug Cloudinex.Middleware, enabled: false
   plug Tesla.Middleware.JSON
 
   adapter Tesla.Adapter.Hackney
@@ -416,10 +417,7 @@ defmodule Cloudinex do
   end
 
   defp client do
-    case Application.get_env(:cloudinex, :debug) do
-      true -> Tesla.build_client [{Tesla.Middleware.DebugLogger, %{}}]
-      _ -> Tesla.build_client []
-    end
+    Tesla.build_client []
   end
 
   defp base_url do

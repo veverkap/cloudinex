@@ -40,7 +40,7 @@ defmodule Cloudinex.Mixfile do
     [
       {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
-      {:tesla, github: "veverkap/tesla"},
+      {:tesla, "~> 0.7"},
 
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},
