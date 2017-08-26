@@ -14,7 +14,7 @@ by adding `cloudinex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:cloudinex, "~> 0.1.0"}]
+  [{:cloudinex, "~> 0.2.1"}]
 end
 ```
 
