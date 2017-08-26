@@ -1,4 +1,5 @@
 defmodule Cloudinex.Middleware do
+  @moduledoc false
   require Logger
 
   def call(env, next, [enabled: false]) do
@@ -7,7 +8,7 @@ defmodule Cloudinex.Middleware do
     env
   end
 
-  def call(env, next, opts) do
+  def call(env, next, _opts) do
     env
     |> log_request
     |> log_headers("-> ")
@@ -29,27 +30,35 @@ defmodule Cloudinex.Middleware do
   end
 
   def log_request(env) do
-    _ = Logger.debug "-> #{env.method |> to_string |> String.upcase} #{env.url}"
+    Logger.debug fn ->
+      "-> #{env.method |> to_string |> String.upcase} #{env.url}"
+    end
     env
   end
 
   def log_response({time, env}) do
     ms = :io_lib.format("~.3f", [time / 1000])
     _ = Logger.debug ""
-    _ = Logger.debug "<- HTTP/1.1 #{env.status} (Duration #{ms} ms)"
+    Logger.debug fn ->
+      "<- HTTP/1.1 #{env.status} (Duration #{ms} ms)"
+    end
     env
   end
 
   def log_headers(env, prefix) do
-    for {k,v} <- env.headers do
-      _ = Logger.debug "#{prefix}#{k}: #{v}"
+    for {k, v} <- env.headers do
+      Logger.debug fn ->
+        "#{prefix}#{k}: #{v}"
+      end
     end
     env
   end
 
   def log_params(env, prefix) do
-    for {k,v} <- env.query do
-      _ = Logger.debug "#{prefix} Query Param '#{k}': '#{v}'"
+    for {k, v} <- env.query do
+      Logger.debug fn ->
+        "#{prefix} Query Param '#{k}': '#{v}'"
+      end
     end
     env
   end
@@ -68,7 +77,9 @@ defmodule Cloudinex.Middleware do
   end
   def log_body(data, prefix) when is_map(data) do
     _ = Logger.debug ""
-    _ = Logger.debug "#{prefix} #{inspect data}"
+    Logger.debug fn ->
+      "#{prefix} #{inspect data}"
+    end
     data
   end
 

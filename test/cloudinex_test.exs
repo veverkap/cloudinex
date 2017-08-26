@@ -5,19 +5,13 @@ defmodule CloudinexTest do
 
   setup do
     bypass = Bypass.open
-
-    Application.put_env(
-      :cloudinex,
-      :base_url, "http://localhost:#{bypass.port}/")
-
+    Application.put_env(:cloudinex, :base_url, "http://localhost:#{bypass.port}/")
     {:ok, %{bypass: bypass}}
   end
 
   describe "debug logger" do
     test "debug logger", %{bypass: bypass} do
-      Application.put_env(
-      :cloudinex,
-      :debug, true)
+      Application.put_env(:cloudinex, :debug, true)
       response = load_fixture("ping")
       Bypass.expect bypass, fn conn ->
         assert "/demo/ping" == conn.request_path

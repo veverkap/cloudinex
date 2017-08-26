@@ -1,4 +1,5 @@
 defmodule Cloudinex do
+  @moduledoc false
   use Tesla, docs: false
   require Logger
   alias Cloudinex.Helpers
@@ -345,7 +346,6 @@ defmodule Cloudinex do
     url = "/resources/#{resource_type}/upload/update_access_mode"
 
     keys = [:public_ids, :access_mode, :next_cursor]
-
 
     options = options
               |> Keyword.merge([public_ids: public_ids, access_mode: access_mode])
