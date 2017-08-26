@@ -68,7 +68,7 @@ defmodule Cloudinex.UploadPresetTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.create_upload_preset("aflaksdfsdf", true, true, tags: "remote", allowed_formats: "jpg,png")
+      {:ok, _} = Cloudinex.create_upload_preset("aflaksdfsdf", true, true, tags: "remote", allowed_formats: "jpg,png")
     end
   end
 
@@ -82,7 +82,7 @@ defmodule Cloudinex.UploadPresetTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.delete_upload_preset("testsfasfdff")
+      {:ok, _} = Cloudinex.delete_upload_preset("testsfasfdff")
     end
   end
 
@@ -97,7 +97,7 @@ defmodule Cloudinex.UploadPresetTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.update_upload_preset("applebottom2", tags: "yolo")
+      {:ok, _} = Cloudinex.update_upload_preset("applebottom2", tags: "yolo")
     end
   end
 end

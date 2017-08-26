@@ -255,7 +255,7 @@ defmodule Cloudinex.ResourceTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin"], "public")
+      {:ok, _} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin"], "public")
     end
 
     test "update_access_mode_by_public_ids/3 returns proper response for multiples", %{bypass: bypass} do
@@ -268,7 +268,7 @@ defmodule Cloudinex.ResourceTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin", "abcsd"], "public")
+      {:ok, _} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin", "abcsd"], "public")
     end
   end
 

@@ -38,7 +38,7 @@ defmodule Cloudinex.FoldersTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.folders("slippy")
+      {:ok, _} = Cloudinex.folders("slippy")
     end
 
     test "folders/1 with_subfolder returns proper response", %{bypass: bypass} do
@@ -50,7 +50,7 @@ defmodule Cloudinex.FoldersTest do
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, body} = Cloudinex.folders("slippy/subfolder")
+      {:ok, _} = Cloudinex.folders("slippy/subfolder")
     end
   end
 end
