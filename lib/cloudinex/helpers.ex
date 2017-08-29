@@ -27,6 +27,12 @@ defmodule Cloudinex.Helpers do
   def prepare_opts(%{tags: tags} = opts) when is_list(tags), do: %{opts | tags: Enum.join(tags, ",")}
   def prepare_opts(opts), do: opts
 
+  def handle_json_response(env) do
+    case handle_response(env) do
+      {:ok, body} -> Poison.decode(body)
+      anything -> anything
+    end
+  end
   def handle_response(%{status: 200, body: body}), do: {:ok, body}
   def handle_response(%{status: 400, body: body}) do
     message = Kernel.get_in(body, ["error", "message"])
@@ -47,4 +53,34 @@ defmodule Cloudinex.Helpers do
   end
 
   def handle_response(%{body: body}), do: {:error, body}
+
+  def sign(data) do
+    timestamp = current_time()
+
+    data_without_secret = data
+      |> Map.delete(:file)
+      |> Map.merge(%{"timestamp" => timestamp})
+      |> Enum.map(fn {key, val} -> "#{key}=#{val}" end)
+      |> Enum.sort
+      |> Enum.join("&")
+
+    signature = (data_without_secret <> Application.get_env(:cloudinex, :secret))
+      |> sha
+
+    Map.merge(data, %{
+      "timestamp" => timestamp,
+      "signature" => signature,
+      "api_key" => Application.get_env(:cloudinex, :api_key)
+    })
+  end
+
+  def sha(query) do
+    :crypto.hash(:sha, query) |> Base.encode16 |> String.downcase
+  end
+
+  def current_time do
+    :os.system_time(:seconds)
+      |> round
+      |> Integer.to_string
+  end
 end

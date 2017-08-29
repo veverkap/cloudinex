@@ -8,10 +8,7 @@ defmodule Cloudinex do
   plug Tesla.Middleware.BaseUrl, base_url()
   plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
                                    password: Application.get_env(:cloudinex, :secret)
-  # plug Tesla.Middleware.FormUrlencoded
   plug Cloudinex.Middleware, enabled: false
-  plug Tesla.Middleware.JSON
-
   adapter Tesla.Adapter.Hackney
 
   @doc """
@@ -416,8 +413,69 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  defp client do
-    Tesla.build_client []
+  def upload(item, opts \\ %{}) when is_binary(item) do
+    case item do
+      "http://" <> _rest  -> item |> upload_url(opts)
+      "https://" <> _rest -> item |> upload_url(opts)
+      _                   -> item |> upload_file(opts)
+    end
+  end
+
+  defp upload_url(url, opts) do
+    params =
+      opts
+      |> Map.merge(%{file: url})
+      |> Helpers.prepare_opts
+      |> Helpers.sign
+      |> URI.encode_query
+
+    client(true)
+    |> post("/image/upload", params)
+    |> Helpers.handle_json_response
+  end
+
+  defp upload_file(file_path, opts) do
+    file_path
+    |> generate_upload_body(opts)
+    |> file_upload
+  end
+
+  defp generate_upload_body(file_path, opts) do
+    {
+      :multipart,
+      (
+        opts
+        |> Helpers.prepare_opts
+        |> Helpers.sign
+        |> Helpers.unify
+        |> Map.to_list
+      ) ++ [{:file, file_path}]
+    }
+  end
+
+  defp file_upload(body) do
+    url = "http://api.cloudinary.com/v1_1/#{Application.get_env(:cloudinex, :cloud_name)}/image/upload"
+    headers =[
+      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Accept", "application/json"},
+    ]
+    {:ok, raw_response} = HTTPoison.request(
+      :post,
+      url,
+      body,
+      headers
+    )
+    {:ok, response} = Poison.decode(raw_response.body)
+    IO.inspect response
+  end
+
+  defp client(form_url_encoded \\ false) do
+    case form_url_encoded do
+      true ->
+        Tesla.build_client [{Tesla.Middleware.FormUrlencoded, %{}}]
+      false ->
+        Tesla.build_client [{Tesla.Middleware.JSON, %{}}]
+    end
   end
 
   defp base_url do
