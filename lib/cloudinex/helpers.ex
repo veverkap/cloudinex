@@ -75,12 +75,19 @@ defmodule Cloudinex.Helpers do
   end
 
   def sha(query) do
-    :crypto.hash(:sha, query) |> Base.encode16 |> String.downcase
+    query
+    |> hash
+    |> Base.encode16
+    |> String.downcase
   end
 
+  def hash(query), do: :crypto.hash(:sha, query)
+
   def current_time do
-    :os.system_time(:seconds)
-      |> round
-      |> Integer.to_string
+    system_time()
+    |> round
+    |> Integer.to_string
   end
+
+  def system_time, do: :os.system_time(:seconds)
 end

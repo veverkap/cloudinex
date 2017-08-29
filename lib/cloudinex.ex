@@ -30,6 +30,9 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+  Returns information about account usage
+  """
   def resource_types do
     client()
     |> get("/resources")
@@ -414,7 +417,7 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  defp client() do
+  defp client do
     Tesla.build_client []
   end
 

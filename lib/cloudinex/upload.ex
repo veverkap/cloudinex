@@ -53,7 +53,7 @@ defmodule Cloudinex.Upload do
 
   defp file_upload(body) do
     url = "http://api.cloudinary.com/v1_1/#{Application.get_env(:cloudinex, :cloud_name)}/image/upload"
-    headers =[
+    headers = [
       {"Content-Type", "application/x-www-form-urlencoded"},
       {"Accept", "application/json"},
     ]
@@ -64,10 +64,10 @@ defmodule Cloudinex.Upload do
       headers
     )
     {:ok, response} = Poison.decode(raw_response.body)
-    IO.inspect response
+    response
   end
 
-  defp client() do
+  defp client do
     Tesla.build_client []
   end
 
