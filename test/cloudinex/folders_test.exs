@@ -16,11 +16,10 @@ defmodule Cloudinex.FoldersTest do
   describe "folders/0" do
     test "folders/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("folders")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/folders" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.folders()
@@ -31,11 +30,10 @@ defmodule Cloudinex.FoldersTest do
   describe "folders/1" do
     test "folders/1 returns proper response", %{bypass: bypass} do
       response = load_fixture("folders/slippy")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/folders/slippy" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _} = Cloudinex.folders("slippy")
@@ -43,11 +41,10 @@ defmodule Cloudinex.FoldersTest do
 
     test "folders/1 with_subfolder returns proper response", %{bypass: bypass} do
       response = load_fixture("folders/slippy/subfolder")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/folders/slippy/subfolder" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _} = Cloudinex.folders("slippy/subfolder")

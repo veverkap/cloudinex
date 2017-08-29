@@ -16,11 +16,10 @@ defmodule Cloudinex.ResourceTest do
   describe "resource_types/0" do
     test "resource_types/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("resources/types")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resource_types
@@ -31,11 +30,10 @@ defmodule Cloudinex.ResourceTest do
   describe "resources/1" do
     test "resources/1 won't load bad resource name", %{bypass: bypass} do
       response = load_fixture("resources/images")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/images" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(400, response)
       end
       {:error, error_msg} = Cloudinex.resources(resource_type: "images")
@@ -44,11 +42,10 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources/1 loads image", %{bypass: bypass} do
       response = load_fixture("resources/image")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources(resource_type: "image")
@@ -57,11 +54,10 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources/1 loads images of upload type", %{bypass: bypass} do
       response = load_fixture("resources/image/upload")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload")
@@ -73,12 +69,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources/1 loads images of upload type with tags", %{bypass: bypass} do
       response = load_fixture("resources/image/tags/apple/tags_true")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "tags=true" == conn.query_string
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload", tags: true)
@@ -90,12 +85,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources/1 loads images of upload type with context", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/context_true")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "context=true" == conn.query_string
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload", context: true)
@@ -106,11 +100,10 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources/1 loads image and ignore bad keyword", %{bypass: bypass} do
       response = load_fixture("resources/image")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources(resource_type: "image", apple: "jo")
@@ -121,11 +114,10 @@ defmodule Cloudinex.ResourceTest do
   describe "resources_by_tag/2" do
     test "resources_by_tag/2 won't load bad resource name", %{bypass: bypass} do
       response = load_fixture("resources/images/tags/apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/images/tags/apple" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(400, response)
       end
       {:error, error_msg} = Cloudinex.resources_by_tag("apple", resource_type: "images")
@@ -134,11 +126,10 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources_by_tag/2 loads valid resource name", %{bypass: bypass} do
       response = load_fixture("resources/image/tags/apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/tags/apple" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources_by_tag("apple", resource_type: "image")
@@ -149,12 +140,11 @@ defmodule Cloudinex.ResourceTest do
   describe "resources_by_context/3" do
     test "resources_by_context/3 loads valid key", %{bypass: bypass} do
       response = load_fixture("resources/image/context/key_apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/context/" == conn.request_path
         assert "GET" == conn.method
         assert "key=apple" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources_by_context("apple", nil, resource_type: "image")
@@ -163,12 +153,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources_by_context/3 loads valid key and value", %{bypass: bypass} do
       response = load_fixture("resources/image/context/key_apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/context/" == conn.request_path
         assert "GET" == conn.method
         assert "key=apple&value=joe" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resources_by_context("apple", "joe", resource_type: "image")
@@ -179,11 +168,10 @@ defmodule Cloudinex.ResourceTest do
   describe "resources_by_moderation/3" do
     test "resources_by_moderation/3 loads valid type", %{bypass: bypass} do
       response = load_fixture("resources/image/context/key_apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _body} = Cloudinex.resources_by_moderation("manual", "pending")
@@ -191,11 +179,10 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources_by_moderation/3 skips invalid type", %{bypass: bypass} do
       response = load_fixture("resources/image/context/key_apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _body} = Cloudinex.resources_by_moderation("apple", "pending")
@@ -203,11 +190,10 @@ defmodule Cloudinex.ResourceTest do
 
     test "resources_by_moderation/3 skips valid status", %{bypass: bypass} do
       response = load_fixture("resources/image/context/key_apple")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _body} = Cloudinex.resources_by_moderation("manual", "apple")
@@ -217,11 +203,10 @@ defmodule Cloudinex.ResourceTest do
   describe "resource/2" do
     test "resource/2 returns proper response", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/bfch0noutwapaasvenin" == conn.request_path
         assert "GET" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.resource("bfch0noutwapaasvenin", resource_type: "image")
@@ -232,11 +217,10 @@ defmodule Cloudinex.ResourceTest do
   describe "update_resource/2" do
     test "update_resource/2 returns proper response", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/bfch0noutwapaasvenin" == conn.request_path
         assert "POST" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.update_resource("bfch0noutwapaasvenin", tags: ["cinammon"])
@@ -247,12 +231,11 @@ defmodule Cloudinex.ResourceTest do
   describe "update_access_mode_by_public_ids/3" do
     test "update_access_mode_by_public_ids/3 returns proper response", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/update_access_mode")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
         assert "PUT" == conn.method
         assert "public_ids%5B%5D=bfch0noutwapaasvenin&access_mode=public" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin"], "public")
@@ -260,12 +243,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "update_access_mode_by_public_ids/3 returns proper response for multiples", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/update_access_mode")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
         assert "PUT" == conn.method
         assert "public_ids%5B%5D=bfch0noutwapaasvenin&public_ids%5B%5D=abcsd&access_mode=public" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin", "abcsd"], "public")
@@ -275,11 +257,10 @@ defmodule Cloudinex.ResourceTest do
   describe "restore" do
     test "restore loads correct url", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin/restore")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/restore" == conn.request_path
         assert "POST" == conn.method
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, _body} = Cloudinex.restore(["one", "two"])
@@ -289,12 +270,11 @@ defmodule Cloudinex.ResourceTest do
   describe "delete_resource/2" do
     test "delete_resource/2 returns proper response", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "public_ids=bfch0noutwapaasvenin" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resource("bfch0noutwapaasvenin")
@@ -305,12 +285,11 @@ defmodule Cloudinex.ResourceTest do
   describe "delete_resources/2" do
     test "delete_resources/2 with public_ids", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "public_ids=bfch0noutwapaasvenin%2Cdude" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       ids = ["bfch0noutwapaasvenin", "dude"]
@@ -320,12 +299,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with public_ids binary", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "public_ids=bfch0noutwapaasvenin%2Cdude" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       ids = "bfch0noutwapaasvenin,dude"
@@ -335,12 +313,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with public_ids binary and keep_original", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "keep_original=true&public_ids=bfch0noutwapaasvenin%2Cdude" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       ids = "bfch0noutwapaasvenin,dude"
@@ -350,12 +327,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with prefix binary", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "prefix=ap" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources(%{prefix: "ap"})
@@ -364,12 +340,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with all", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "all=true" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources(%{all: true})
@@ -378,12 +353,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with tag", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/tags/apple" == conn.request_path
         assert "DELETE" == conn.method
         assert "" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources(%{tag: "apple"})
@@ -392,12 +366,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with tag and keep_original", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/tags/apple" == conn.request_path
         assert "DELETE" == conn.method
         assert "keep_original=true" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources(%{tag: "apple"}, [keep_original: true])
@@ -406,12 +379,11 @@ defmodule Cloudinex.ResourceTest do
 
     test "delete_resources/2 with all and invalidate", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "invalidate=true&all=true" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources(%{all: true}, [invalidate: true])
@@ -422,12 +394,11 @@ defmodule Cloudinex.ResourceTest do
   describe "delete_derived_resources/2" do
     test "delete_derived_resources/2", %{bypass: bypass} do
       response = load_fixture("derived_resources_delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/derived_resources" == conn.request_path
         assert "DELETE" == conn.method
         assert "derived_resource_ids%5B%5D=a7b2a2756a&derived_resource_ids%5B%5D=dude" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       ids = ["a7b2a2756a", "dude"]
@@ -439,12 +410,11 @@ defmodule Cloudinex.ResourceTest do
   describe "delete_resources_by_prefix/2" do
     test "delete_resources/2 with prefix binary", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "prefix=ap" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources_by_prefix("ap")
@@ -455,12 +425,11 @@ defmodule Cloudinex.ResourceTest do
   describe "delete_all_resources" do
     test "delete_all_resources/1", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload" == conn.request_path
         assert "DELETE" == conn.method
         assert "all=true" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_all_resources()
@@ -471,12 +440,11 @@ defmodule Cloudinex.ResourceTest do
   describe "delete_resources_by_tag/2" do
     test "delete_resources_by_tag/2", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/bfch0noutwapaasvenin-dude/delete")
-      Bypass.expect bypass, fn conn ->
+      expect_json bypass, fn conn ->
         assert "/demo/resources/image/tags/apple" == conn.request_path
         assert "DELETE" == conn.method
         assert "" == conn.query_string
         conn
-        |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.delete_resources_by_tag("apple")
