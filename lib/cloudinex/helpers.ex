@@ -1,5 +1,7 @@
 defmodule Cloudinex.Helpers do
-  @moduledoc false
+  @doc """
+  Converst to key value
+  """
   def unify(nil), do: nil
   def unify(data) do
     data
@@ -8,9 +10,15 @@ defmodule Cloudinex.Helpers do
     end)
   end
 
+  @doc """
+  Joins enumerable
+  """
   def join_list(nil), do: ""
   def join_list(list), do: Enum.join(list, ",")
 
+  @doc """
+  Maps context
+  """
   def map_context(nil), do: nil
   def map_context(context) when is_map(context) do
     context
