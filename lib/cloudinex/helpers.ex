@@ -1,6 +1,15 @@
 defmodule Cloudinex.Helpers do
+  @moduledoc """
+  These are helper functions that assist with handling responses and creating
+  requests
+  """
+
   @doc """
-  Converst to key value
+  Converts Enumerable of tuples to key value map
+
+  ```ex
+  %{"first" => "value"} = Cloudinex.Helpers.unify([first: "value"])
+  ```
   """
   def unify(nil), do: nil
   def unify(data) do
