@@ -1,20 +1,58 @@
 defmodule Cloudinex do
-  @moduledoc false
+  @moduledoc """
+    Cloudinex is an Elixir wrapper around the Cloudinary API.
+
+    The administrative API allows full control of all uploaded raw files and
+    images, fetched social profile pictures, generated transformations and more.
+
+    The API is accessed using HTTPS to endpoints in the following format:
+
+    `https://api.cloudinary.com/v1_1/:cloud_name/:action`
+
+    Authentication is done using Basic Authentication over secure HTTP. Your
+    Cloudinary API Key and API Secret are used for the authentication and can be
+    found [here](https://cloudinary.com/console).  Configuration
+    is handled via application variables:
+
+    ```elixir
+    config :cloudinex,
+          debug: false, #optional
+          base_url: "https://api.cloudinary.com/v1_1/",
+          api_key: "YOUR_API_KEY",
+          secret: "YOUR_API_SECRET",
+          cloud_name: "YOUR_CLOUD_NAME"
+    ```
+
+    Request parameters are appended to the URL by passing in a keyword list of
+    options.
+
+    All responses are decoded from JSON into Elixir maps.
+
+    [Cloudinary Documentation](http://cloudinary.com/documentation)
+  """
   use Tesla, docs: false
   require Logger
-  alias Cloudinex.Helpers
+  alias Cloudinex.{Helpers, Usage, UsageDetail}
   import Cloudinex.Validation
 
   plug Tesla.Middleware.BaseUrl, base_url()
   plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
                                    password: Application.get_env(:cloudinex, :secret)
   plug Tesla.Middleware.JSON
-  plug Cloudinex.Middleware, enabled: false
+  plug Cloudinex.Middleware, enabled: Application.get_env(:cloudinex, :debug, false)
   adapter Tesla.Adapter.Hackney
 
   @doc """
-  Pings the Cloudinary endpoints
+    Test the reachability of the Cloudinary API with the ping method.
+
+    ```elixir
+    iex> Cloudinex.ping
+    {:ok, %{"status" => "ok"}}
+    ```
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#ping_cloudinary)
   """
+  @spec ping() :: {atom, map}
   def ping do
     client()
     |> get("/ping")
@@ -22,26 +60,88 @@ defmodule Cloudinex do
   end
 
   @doc """
-  Returns information about account usage
+    Test the reachability of the Cloudinary API with the ping method.
+
+    ```elixir
+    iex> Cloudinex.ping!
+    %{"status" => "ok"}
+    ```
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#ping_cloudinary)
   """
-  def usage do
+  @spec ping!() :: map
+  def ping! do
     client()
-    |> get("/usage")
-    |> Helpers.handle_response
+    |> get("/ping")
+    |> Helpers.handle_bang_response
   end
 
   @doc """
-  Returns information about account usage
+    Get a report on the status of your Cloudinary account usage details, including
+    storage, bandwidth, requests, number of resources, and add-on usage. Note that
+    numbers are updated periodically
+
+    ```elixir
+    iex> a = Cloudinex.usage
+    %Cloudinex.Usage{
+      bandwidth: %Cloudinex.UsageDetail{limit: 6442450944, usage: 3927186, used_percent: 0.06},
+      derived_resources: 167,
+      last_updated: "2017-08-29",
+      objects: %Cloudinex.UsageDetail{limit: 125000, usage: 230, used_percent: 0.18},
+      plan: "Free",
+      requests: 230,
+      resources: 63,
+      storage: %Cloudinex.UsageDetail{limit: 2671771648, usage: 23139073, used_percent: 0.87},
+      transformations: %Cloudinex.UsageDetail{limit: 7500, usage: 39, used_percent: 0.52}}
+
+    iex> a.bandwidth.limit
+    6442450944
+    ```
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#usage_report)
   """
+  @spec usage() :: %Usage{}
+  def usage do
+    client()
+    |> get("/usage")
+    |> Helpers.handle_bang_response
+    |> Cloudinex.Usage.new
+  end
+
+  @doc """
+    Returns available resource types
+
+    ```elixir
+    iex> Cloudinex.resource_types
+    {:ok, %{"resource_types" => ["image"]}}
+  """
+  @spec resource_types() :: {atom, map}
   def resource_types do
     client()
     |> get("/resources")
     |> Helpers.handle_response
   end
 
+  @doc """
+  List resources by parameters
+
+  Parameters:
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:type` - Optional (String, default: all). The storage type, for example, upload, private, authenticated, facebook, etc. Relevant as a parameter only when using the SDKs (the type is included in the endpoint URL for direct calls to the HTTP API).
+    * `:prefix` - Optional. (String). Find all resources with a public ID that starts with the given prefix. The resources are sorted by public ID in the response.
+    * `:public_ids` - Optional. (String, comma-separated list of public IDs). List resources with the given public IDs (up to 100).
+    * `:max_results` - Optional. (Integer, default=10. maximum=500). Max number of resources to return.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+    * `:start_at` - Optional. (Timestamp string). List resources that were created since the given timestamp. Supported if no prefix or public IDs were specified.
+    * `:direction` - Optional. (String/Integer, "asc" (or 1), "desc" (or -1), default: "desc" according to the created_at date). Control the order of returned resources. Note that if a prefix is specified, this parameter is ignored and the results are sorted by public ID.
+    * `:tags` - Optional (Boolean, default: false). If true, include the list of tag names assigned each resource.
+    * `:context` - Optional (Boolean, default: false). If true, include key-value pairs of context associated with each resource.
+    * `:moderations` - Optional (Boolean, default: false). If true, include image moderation status of each listed resource.
+  """
+  @spec resources(options :: Keyword.t) :: map
   def resources(options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
-    {type, options} = Keyword.pop(options, :type)
+    {type, options}          = Keyword.pop(options, :type)
 
     url = case type do
       nil ->
@@ -50,8 +150,8 @@ defmodule Cloudinex do
         "/resources/#{resource_type}/#{type}"
     end
 
-    keys = [:prefix, :public_ids, :max_results, :next_cursor, :start_at,
-            :direction, :tags, :context, :moderations]
+    keys = [:context, :direction, :max_results, :moderations, :next_cursor,
+            :prefix, :public_ids, :start_at, :tags]
 
     options = options
               |> Keyword.take(keys)

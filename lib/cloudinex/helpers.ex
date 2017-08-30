@@ -50,6 +50,12 @@ defmodule Cloudinex.Helpers do
       anything -> anything
     end
   end
+  def handle_bang_response(env) do
+    case handle_response(env) do
+      {:error, message} -> raise RuntimeError, message: message
+      {:ok, result} -> result
+    end
+  end
   def handle_response(%{status: 200, body: body}), do: {:ok, body}
   def handle_response(%{status: 400, body: body}) do
     message = Kernel.get_in(body, ["error", "message"])
@@ -70,6 +76,29 @@ defmodule Cloudinex.Helpers do
   end
 
   def handle_response(%{body: body}), do: {:error, body}
+
+  @doc """
+    Atomizes an enumerable
+
+    ## Examples
+    iex> item = []
+    ...> Wombat.Utils.atomize(item)
+    []
+
+    iex> item = "dog"
+    ...> Wombat.Utils.atomize(item)
+    ** (FunctionClauseError) no function clause matching in Wombat.Utils.atomize/1
+
+    iex> item = [{ "id", 100 }, { "name", "joe"}]
+    ...> Wombat.Utils.atomize(item)
+    [id: 100, name: "joe"]
+
+    iex> Wombat.Utils.atomize(%{"id" => 311, "name" => "Legal Team1"})
+    [id: 311, name: "Legal Team1"]
+  """
+  def atomize(item) when is_list(item) or is_map(item) do
+    Enum.map(item, fn({k, v}) -> {String.to_atom(k), v} end)
+  end
 
   def sign(data) do
     timestamp = current_time()
