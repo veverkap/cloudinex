@@ -80,7 +80,6 @@ defmodule CloudinexTest do
         |> Plug.Conn.resp(200, response)
       end
       {:ok, body} = Cloudinex.usage
-      assert body == Poison.decode!(response)
     end
   end
 
