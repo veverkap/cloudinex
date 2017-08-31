@@ -5,7 +5,10 @@
 [ ![Codeship Status for veverkap/cloudinex](https://app.codeship.com/projects/92f66fd0-676b-0135-d1a2-52d2c2f6a252/status?branch=master)](https://app.codeship.com/projects/241057)
 [![Coverage Status](https://coveralls.io/repos/github/veverkap/cloudinex/badge.svg?branch=master)](https://coveralls.io/github/veverkap/cloudinex?branch=master)
 [![Inline docs](http://inch-ci.org/github/veverkap/cloudinex.svg)](http://inch-ci.org/github/veverkap/cloudinex)
-**TODO: Add description**
+
+
+## Description
+Cloudinex is an Elixir wrapper around the Cloudinary API.
 
 ## Installation
 

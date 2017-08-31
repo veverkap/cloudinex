@@ -17,3 +17,5 @@ engines:
 exclude_paths:
 - config
 - test
+- .credo.exs
+- README.md
