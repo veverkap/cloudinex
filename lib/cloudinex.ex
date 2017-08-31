@@ -213,6 +213,7 @@ defmodule Cloudinex do
 
   @doc """
     Retrieve a list of resources with a specified context key. This method does not return deleted resources even if they have been backed up.
+
     * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
     * `:value` - Optional. (String). Only resources with this value for the context key are returned. If this parameter is not provided, all resources with the given context key are returned, regardless of the actual value of the key.
     * `:max_results` - Optional. (Integer, default=10. maximum=500). Max number of resources to return.
@@ -244,14 +245,32 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  def resources_by_moderation(type, status, options \\ []) do
+  @type moderation_type :: String.t
+
+  @doc """
+    List resources in moderation queues
+    * `:moderation_type` - (String: "manual", "webpurify", "aws_rek", or "metascan"). Type of image moderation queue to list.
+    * `:status` - (String: "pending", "approved", "rejected"). Moderation status of resources.
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:max_results` - Optional. (Integer, default=10. maximum=500). Max number of resources to return.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+    * `:direction` - Optional. (String/Integer, "asc" (or 1), "desc" (or -1), default: "desc" by creation date). Control the order of returned resources.
+    * `:tags` - Optional (Boolean, default: false). If true, include the list of tag names assigned each resource.
+    * `:context` - Optional (Boolean, default: false). If true, include key-value pairs of context associated with each resource.
+    * `:moderations` - Optional (Boolean, default: false). If true, include image moderation status of each listed resource.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_in_moderation_queues)
+  """
+  @spec resources_by_moderation(moderation_type :: moderation_type, status :: String.t, options :: Keyword.t) :: map
+  def resources_by_moderation(moderation_type, status, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
     valid_types = ["manual", "webpurify", "aws_rek", "metascan"]
     valid_status = ["pending", "approved", "rejected"]
 
-    type = case Enum.member?(valid_types, type) do
-      true -> type
+    moderation_type = case Enum.member?(valid_types, moderation_type) do
+      true -> moderation_type
       false -> "manual"
     end
 
@@ -260,7 +279,7 @@ defmodule Cloudinex do
       false -> "pending"
     end
 
-    url = "/resources/#{resource_type}/moderations/#{type}/#{status}"
+    url = "/resources/#{resource_type}/moderations/#{moderation_type}/#{status}"
 
     client()
     |> get(url, query: options)

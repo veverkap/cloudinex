@@ -22,8 +22,18 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/cloudinex](https://hexdocs.pm/cloudinex).
+## Configuration
 
+Authentication is done using Basic Authentication over secure HTTP. Your
+Cloudinary API Key and API Secret are used for the authentication and can be
+found [here](https://cloudinary.com/console).  Configuration
+is handled via application variables:
 
+```elixir
+config :cloudinex,
+      debug: false, #optional
+      base_url: "https://api.cloudinary.com/v1_1/",
+      api_key: "YOUR_API_KEY",
+      secret: "YOUR_API_SECRET",
+      cloud_name: "YOUR_CLOUD_NAME"
+```
