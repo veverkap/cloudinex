@@ -79,7 +79,7 @@ defmodule CloudinexTest do
         conn
         |> Plug.Conn.resp(200, response)
       end
-      usage = Cloudinex.usage
+      Cloudinex.usage
     end
   end
 

@@ -262,7 +262,9 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_in_moderation_queues)
   """
-  @spec resources_by_moderation(moderation_type :: moderation_type, status :: String.t, options :: Keyword.t) :: map
+  @spec resources_by_moderation(moderation_type :: moderation_type,
+                                status :: String.t,
+                                options :: Keyword.t) :: map
   def resources_by_moderation(moderation_type, status, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
