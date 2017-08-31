@@ -27,7 +27,6 @@ defmodule Cloudinex.Usage do
             storage: %UsageDetail{},
             transformations: %UsageDetail{}
 
-
   def new(item) do
     usage_struct = struct(Usage, Helpers.atomize(item))
 

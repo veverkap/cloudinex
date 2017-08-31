@@ -32,7 +32,7 @@ defmodule Cloudinex do
   """
   use Tesla, docs: false
   require Logger
-  alias Cloudinex.{Helpers, Usage, UsageDetail}
+  alias Cloudinex.{Helpers, Usage}
   import Cloudinex.Validation
 
   plug Tesla.Middleware.BaseUrl, base_url()
@@ -105,7 +105,7 @@ defmodule Cloudinex do
     client()
     |> get("/usage")
     |> Helpers.handle_bang_response
-    |> Cloudinex.Usage.new
+    |> Usage.new
   end
 
   @doc """
@@ -123,9 +123,8 @@ defmodule Cloudinex do
   end
 
   @doc """
-  List resources by parameters
+    List resources by parameters
 
-  Parameters:
     * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
     * `:type` - Optional (String, default: all). The storage type, for example, upload, private, authenticated, facebook, etc. Relevant as a parameter only when using the SDKs (the type is included in the endpoint URL for direct calls to the HTTP API).
     * `:prefix` - Optional. (String). Find all resources with a public ID that starts with the given prefix. The resources are sorted by public ID in the response.
@@ -137,6 +136,28 @@ defmodule Cloudinex do
     * `:tags` - Optional (Boolean, default: false). If true, include the list of tag names assigned each resource.
     * `:context` - Optional (Boolean, default: false). If true, include key-value pairs of context associated with each resource.
     * `:moderations` - Optional (Boolean, default: false). If true, include image moderation status of each listed resource.
+
+    ```elixir
+    iex> Cloudinex.resources
+    {:ok,
+     %{"next_cursor" => "c3e05e720779a7aba3953abfc1017e5b",
+       "resources" => [
+        %{"bytes" => 745895,
+          "created_at" => "2017-08-29T20:30:06Z",
+          "format" => "png",
+          "height" => 720,
+          "public_id" => "zfqp6sjepkrkyrxnflpr",
+          "resource_type" => "image",
+          "secure_url" => "https://res.cloudinary.com/demo/image/upload/v1504038606/zfqp6sjepkrkyrxnflpr.png",
+          "type" => "upload",
+          "url" => "http://res.cloudinary.com/demo/image/upload/v1504038606/zfqp6sjepkrkyrxnflpr.png",
+          "version" => 1504038606,
+          "width" => 720}
+        ]
+      }
+    }
+    ```
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_resources)
   """
   @spec resources(options :: Keyword.t) :: map
   def resources(options \\ []) do
@@ -161,6 +182,20 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Retrieve a list of resources with a specified tag. This method does not return deleted resources even if they have been backed up.
+
+    * `:resource_type` - Optional (String, default: image). The type of files for which you want to retrieve tags. Possible values: image, raw, video. Note: Use the video resource type for all video resources as well as for audio files, such as .mp3. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API).
+    * `:max_results` - Optional. (Integer, default=10. maximum=500). Max number of resources to return.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+    * `:direction` - Optional. (String/Integer, "asc" (or 1), "desc" (or -1), default: "desc" by creation date). Control the order of returned resources.
+    * `:tags` - Optional (Boolean, default: false). If true, include the list of tag names assigned each resource.
+    * `:context` - Optional (Boolean, default: false). If true, include key-value pairs of context associated with each resource.
+    * `:moderations` - Optional (Boolean, default: false). If true, include image moderation status of each listed resource.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_by_tag)
+  """
+  @spec resources_by_tag(tag :: String.t, options :: Keyword.t) :: map
   def resources_by_tag(tag, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
@@ -176,6 +211,19 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Retrieve a list of resources with a specified context key. This method does not return deleted resources even if they have been backed up.
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:value` - Optional. (String). Only resources with this value for the context key are returned. If this parameter is not provided, all resources with the given context key are returned, regardless of the actual value of the key.
+    * `:max_results` - Optional. (Integer, default=10. maximum=500). Max number of resources to return.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+    * `:direction` - Optional. (String/Integer, "asc" (or 1), "desc" (or -1), default: "desc" by creation date). Control the order of returned resources.
+    * `:tags` - Optional (Boolean, default: false). If true, include the list of tag names assigned each resource.
+    * `:context `- Optional (Boolean, default: false). If true, include all key-value pairs of context associated with each resource.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_by_context)
+  """
+  @spec resources_by_context(key :: String.t, value :: String.t, options :: Keyword.t) :: map
   def resources_by_context(key, value \\ nil, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
