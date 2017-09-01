@@ -300,7 +300,6 @@ defmodule Cloudinex do
     * `:max_results` - Optional. The number of derived images to return. Default=10. Maximum=100.
     * `:next_cursor` - Optional. If there are more derived images than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
 
-
     [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_resource)
   """
   @spec resource(public_id :: String.t, options :: Keyword.t) :: map

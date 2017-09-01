@@ -97,7 +97,7 @@ defmodule CloudinexTest do
       end
     end
 
-    test "ping1/0 invalid credentials", %{bypass: bypass} do
+    test "ping!/0 invalid credentials", %{bypass: bypass} do
       expect_json bypass, fn conn ->
         assert "/demo/ping" == conn.request_path
         assert "GET" == conn.method
