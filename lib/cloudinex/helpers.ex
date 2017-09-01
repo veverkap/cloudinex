@@ -57,7 +57,9 @@ defmodule Cloudinex.Helpers do
     end
   end
   def handle_response(%{status: 200, body: body}), do: {:ok, body}
-  def handle_response(%{status: 400, body: body}) do
+  def handle_response(%{status: 400, body: body}) when is_binary(body),
+    do: handle_response(%{status: 400, body: Poison.decode!(body)})
+  def handle_response(%{status: 400, body: body}) when is_map(body) do
     message = Kernel.get_in(body, ["error", "message"])
     {:error, "Bad Request: #{message}"}
   end

@@ -33,6 +33,7 @@ defmodule Cloudinex do
   use Tesla, docs: false
   require Logger
   alias Cloudinex.{Helpers, Usage}
+  alias Mix.Project
   import Cloudinex.Validation
 
   plug Tesla.Middleware.BaseUrl, base_url()
@@ -41,6 +42,8 @@ defmodule Cloudinex do
   plug Tesla.Middleware.JSON
   plug Cloudinex.Middleware, enabled: Application.get_env(:cloudinex, :debug, false)
   adapter Tesla.Adapter.Hackney
+
+  def version, do: Project.config[:version]
 
   @doc """
     Test the reachability of the Cloudinary API with the ping method.

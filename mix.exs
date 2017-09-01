@@ -1,9 +1,11 @@
 defmodule Cloudinex.Mixfile do
   use Mix.Project
 
+  @version "0.2.1"
+
   def project do
     [app: :cloudinex,
-     version: "0.2.1",
+     version: @version,
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,

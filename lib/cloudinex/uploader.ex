@@ -1,4 +1,4 @@
-defmodule Cloudinex.Upload do
+defmodule Cloudinex.Uploader do
   @moduledoc false
   use Tesla, docs: false
   require Logger
@@ -52,14 +52,14 @@ defmodule Cloudinex.Upload do
   end
 
   defp file_upload(body) do
-    url = "http://api.cloudinary.com/v1_1/#{Application.get_env(:cloudinex, :cloud_name)}/image/upload"
     headers = [
       {"Content-Type", "application/x-www-form-urlencoded"},
       {"Accept", "application/json"},
+      {"user-agent", "cloudinex/#{Cloudinex.version}"}
     ]
     {:ok, raw_response} = HTTPoison.request(
       :post,
-      url,
+      "#{base_url()}/image/upload",
       body,
       headers
     )
