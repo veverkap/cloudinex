@@ -10,6 +10,14 @@ defmodule Cloudinex.UploaderTest do
       :cloudinex,
       :base_url, "http://localhost:#{bypass.port}/")
 
+    Application.put_env(
+      :cloudinex,
+      :api_key, "fakeapikey")
+
+    Application.put_env(
+      :cloudinex,
+      :secret, "somefakestring")
+
     {:ok, %{bypass: bypass}}
   end
 
@@ -46,7 +54,7 @@ defmodule Cloudinex.UploaderTest do
       assert "POST" == conn.method
       {:ok, _, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
       assert Enum.any?(conn.req_headers, fn({a,b}) ->
-        a == "content-length" && b == "8381"
+        a == "content-length" && b == "8376"
       end)
 
       conn
