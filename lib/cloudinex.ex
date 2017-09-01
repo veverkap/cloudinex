@@ -44,6 +44,8 @@ defmodule Cloudinex do
   adapter Tesla.Adapter.Hackney
 
   def version, do: Project.config[:version]
+  @valid_moderation_types ~w(manual webpurify aws_rek metascan)
+  @valid_moderation_statuses ~w(pending approved rejected)
 
   @doc """
     Test the reachability of the Cloudinary API with the ping method.
@@ -248,10 +250,9 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  @type moderation_type :: String.t
-
   @doc """
     List resources in moderation queues
+
     * `:moderation_type` - (String: "manual", "webpurify", "aws_rek", or "metascan"). Type of image moderation queue to list.
     * `:status` - (String: "pending", "approved", "rejected"). Moderation status of resources.
 
@@ -265,24 +266,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_in_moderation_queues)
   """
-  @spec resources_by_moderation(moderation_type :: moderation_type,
+  @spec resources_by_moderation(moderation_type :: String.t,
                                 status :: String.t,
                                 options :: Keyword.t) :: map
-  def resources_by_moderation(moderation_type, status, options \\ []) do
+  def resources_by_moderation(moderation_type, status, options \\ [])
+    when moderation_type in @valid_moderation_types
+    and status in @valid_moderation_statuses do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
-
-    valid_types = ["manual", "webpurify", "aws_rek", "metascan"]
-    valid_status = ["pending", "approved", "rejected"]
-
-    moderation_type = case Enum.member?(valid_types, moderation_type) do
-      true -> moderation_type
-      false -> "manual"
-    end
-
-    status = case Enum.member?(valid_status, status) do
-      true -> status
-      false -> "pending"
-    end
 
     url = "/resources/#{resource_type}/moderations/#{moderation_type}/#{status}"
 
@@ -291,6 +281,29 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Details of a single resource
+
+    Return details of the requested resource as well as all its derived resources.
+    Note that if you only need details about the original resource, you can also
+    use the upload or explicit methods, which are not rate limited.
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:type` - Optional (String, default: upload). The storage type, for example, upload, private, authenticated, facebook, etc. Relevant as a parameter only when using the SDKs (the type is included in the endpoint URL for direct calls to the HTTP API).
+    * `:colors` - Optional (Boolean, default: false). If true, include color information: predominant colors and histogram of 32 leading colors.
+    * `:image_metadata` - Optional (Boolean, default: false). If true, include colorspace, ETag, IPTC, XMP, and detailed Exif metadata of the uploaded photo. Note: retrieves video metadata if the resource is a video file.
+    * `:exif` - Optional (Boolean, default: false). If true, include image metadata (e.g., camera details). Deprecated. Please use image_metadata instead.
+    * `:faces` - Optional (Boolean, default: false). If true, include a list of coordinates of detected faces.
+    * `:pages` - Optional (Boolean, default: false). If true, report the number of pages in multi-page documents (e.g., PDF)
+    * `:phash` - Optional (Boolean, default: false). If true, include the perceptual hash (pHash) of the uploaded photo for image similarity detection.
+    * `:coordinates` - Optional (Boolean, default: false). If true, include previously specified custom cropping coordinates and faces coordinates.
+    * `:max_results` - Optional. The number of derived images to return. Default=10. Maximum=100.
+    * `:next_cursor` - Optional. If there are more derived images than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_resource)
+  """
+  @spec resource(public_id :: String.t, options :: Keyword.t) :: map
   def resource(public_id, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
     {type, options} = Keyword.pop(options, :type, "upload")

@@ -177,26 +177,16 @@ defmodule Cloudinex.ResourceTest do
       {:ok, _body} = Cloudinex.resources_by_moderation("manual", "pending")
     end
 
-    test "resources_by_moderation/3 skips invalid type", %{bypass: bypass} do
-      response = load_fixture("resources/image/context/key_apple")
-      expect_json bypass, fn conn ->
-        assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
-        assert "GET" == conn.method
-        conn
-        |> Plug.Conn.resp(200, response)
+    test "resources_by_moderation/3 raises on invalid type", %{bypass: bypass} do
+      assert_raise FunctionClauseError, fn ->
+        Cloudinex.resources_by_moderation("apple", "pending")
       end
-      {:ok, _body} = Cloudinex.resources_by_moderation("apple", "pending")
     end
 
-    test "resources_by_moderation/3 skips valid status", %{bypass: bypass} do
-      response = load_fixture("resources/image/context/key_apple")
-      expect_json bypass, fn conn ->
-        assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
-        assert "GET" == conn.method
-        conn
-        |> Plug.Conn.resp(200, response)
+    test "resources_by_moderation/3 raises on invalid status", %{bypass: bypass} do
+      assert_raise FunctionClauseError, fn ->
+        Cloudinex.resources_by_moderation("manual", "apple")
       end
-      {:ok, _body} = Cloudinex.resources_by_moderation("manual", "apple")
     end
   end
 
