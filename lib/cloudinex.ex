@@ -288,6 +288,7 @@ defmodule Cloudinex do
     Note that if you only need details about the original resource, you can also
     use the upload or explicit methods, which are not rate limited.
 
+    * `:public_id` - Required. (String). The public ID of the resource
     * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
     * `:type` - Optional (String, default: upload). The storage type, for example, upload, private, authenticated, facebook, etc. Relevant as a parameter only when using the SDKs (the type is included in the endpoint URL for direct calls to the HTTP API).
     * `:colors` - Optional (Boolean, default: false). If true, include color information: predominant colors and histogram of 32 leading colors.
@@ -320,6 +321,27 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Update one or more of the attributes associated with a specified resource. Note that you can also update many attributes of an existing resource using the explicit method, which is not rate limited
+
+    * `:public_id` - Required. (String). The public ID of the resource to update.
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:type` - Optional (String, default: upload). The storage type, for example, upload, private, authenticated, facebook, etc. Relevant as a parameter only when using the SDKs (the type is included in the endpoint URL for direct calls to the HTTP API).
+    * `:tags` - (Optional). A comma-separated list of tag names to assign to the uploaded image for later group reference.
+    * `:context` - (Optional). A pipe separated list of key-value pairs of general textual context metadata to attach to an uploaded resource. The context values of uploaded files are available for fetching using the Admin API. For example: "alt=My image|caption=Profile Photo".
+    * `:face_coordinates` - (Optional). List of coordinates of faces contained in an uploaded image. The given coordinates are used for cropping uploaded images using the face or faces gravity mode. The specified coordinates override the automatically detected faces. Each face is specified by the X & Y coordinates of the top left corner and the width & height of the face. The coordinates are comma separated while faces are concatenated with '|'. For example: "10,20,150,130|213,345,82,61".
+    * `:custom_coordinates` - (Optional). Coordinates of an interesting region contained in an uploaded image. The given coordinates are used for cropping uploaded images using the custom gravity mode. The region is specified by the X & Y coordinates of the top left corner and the width & height of the region. For example: "85,120,220,310".
+    * `:moderation_status` - (Optional. String: "approved", "rejected"). Manually set image moderation status or override previously automatically moderated images by approving or rejecting.
+    * `:auto_tagging` (0.0 to 1.0 Decimal number) - (Optional). Whether to assign tags to an image according to detected scene categories with confidence score higher than the given value.
+    * `:detection` - (Optional). Set to 'adv_face' to automatically extract advanced face attributes of photos using the Advanced Facial Attributes Detection add-on.
+    * `:ocr` - (Optional). Set to 'adv_ocr' to extract all text elements in an image as well as the bounding box coordinates of each detected element using the OCR Text Detection and Extraction add-on.
+    * `:raw_convert` - (Optional). Set to 'aspose' to automatically convert Office documents to PDF files and other image formats using the Aspose Document Conversion add-on.
+    * `:categorization` - (Optional). Set to 'imagga_tagging' to automatically detect scene categories of photos using the Imagga Auto Tagging add-on.
+    * `:background_removal` - (Optional). Set to 'remove_the_background' (or 'pixelz' - the new name of the company) to automatically clear the background of an uploaded photo using the Remove-The-Background Editing add-on.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#update_resources)
+  """
+  @spec update_resource(public_id :: String.t, options :: Keyword.t) :: map
   def update_resource(public_id, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
     {type, options} = Keyword.pop(options, :type, "upload")
@@ -349,7 +371,17 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  def restore(public_ids, options \\ []) do
+  @doc """
+    Restore one or more resources from backup
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:type` - Optional (String, default: upload). The storage type, for example, upload, private, authenticated, facebook, etc. Relevant as a parameter only when using the SDKs (the type is included in the endpoint URL for direct calls to the HTTP API).
+    * `:public_ids` - The public IDs of (deleted or existing) backed up resources to restore. Reverts to the latest backed up version of the resource.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#restore_resources)
+  """
+  @spec restore_resource(public_ids :: List.t, options :: Keyword.t) :: map
+  def restore_resource(public_ids, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
     {type, _options} = Keyword.pop(options, :type, "upload")
 
@@ -360,9 +392,14 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  def delete_resource(public_id, options \\ []) when is_binary(public_id),
-    do: delete_resources(%{public_ids: [public_id]}, options)
+  @doc """
+    Delete derived resources
 
+    * `:derived_resource_ids` - Delete all derived resources with the given IDs (an array of up to 100 derived_resource_ids). The derived resource IDs are returned when calling the Details of a single resource method.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#delete_derived_resources)
+  """
+  @spec delete_derived_resources(derived_resource_ids :: List.t, options :: Keyword.t) :: map
   def delete_derived_resources(derived_resource_ids, options \\ []) do
     query = [derived_resource_ids: derived_resource_ids]
           |> Keyword.merge(options)
@@ -374,22 +411,104 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Deletes a single resource by its public id
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
+  @spec delete_resource(public_id :: String.t, options :: Keyword.t) :: map
+  def delete_resource(public_id, options \\ []) when is_binary(public_id),
+    do: delete_resources(%{public_ids: [public_id]}, options)
+
+  @doc """
+    Delete all resources, including derived resources, where the public ID starts with the given prefix (up to a maximum of 1000 original resources).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
+  @spec delete_resources_by_prefix(prefix :: String.t, options :: Keyword.t) :: map
   def delete_resources_by_prefix(prefix, options \\ []) when is_binary(prefix),
     do: delete_resources(%{prefix: prefix}, options)
+  @doc """
+    Delete all resources (of the relevant resource type and type), including derived resources (up to a maximum of 1000 original resources).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
+  @spec delete_all_resources(options :: Keyword.t) :: map
   def delete_all_resources(options \\ []),
     do: delete_resources(%{all: true}, options)
+  @doc """
+    Delete all resources (and their derivatives) with the given tag name (up to a maximum of 1000 original resources).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#delete_resources_by_tags)
+  """
+  @spec delete_resources_by_tag(tag :: String.t, options :: Keyword.t) :: map
   def delete_resources_by_tag(tag, options \\ []),
     do: delete_resources(%{tag: tag}, options)
 
+  @spec delete_resources(hash :: Map.t, options :: Keyword.t) :: map
   def delete_resources(hash, options \\ [])
+  @doc """
+    Delete all resources with the given public IDs (array of up to 100 public_ids).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
   def delete_resources(%{public_ids: public_ids}, options) when is_list(public_ids),
     do: delete_resources(%{public_ids:  Helpers.join_list(public_ids)}, options)
   def delete_resources(%{public_ids: public_ids}, options) when is_binary(public_ids),
     do: call_delete(options, [public_ids: public_ids])
+  @doc """
+    Delete all resources, including derived resources, where the public ID starts with the given prefix (up to a maximum of 1000 original resources).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
   def delete_resources(%{prefix: prefix}, options) when is_binary(prefix),
     do: call_delete(options, [prefix: prefix])
+  @doc """
+    Delete all resources (of the relevant resource type and type), including derived resources (up to a maximum of 1000 original resources).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
   def delete_resources(%{all: true}, options),
     do: call_delete(options, [all: true])
+  @doc """
+    Delete all resources (and their derivatives) with the given tag name (up to a maximum of 1000 original resources).
+
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:keep_original` - Optional (Boolean, default: false). If true, delete only the derived images of the matching resources.
+    * `:invalidate` - Optional (Boolean, default: false). Whether to also invalidate the copies of the resource on the CDN. It usually takes a few minutes (although it might take up to an hour) for the invalidation to fully propagate through the CDN. There are also a number of other important considerations to keep in mind when invalidating files. Note that by default this parameter is not enabled: if you need this parameter enabled, please open a support request.
+    * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
+    * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
+  """
   def delete_resources(%{tag: tag}, options),
     do: call_delete(options, [tag: tag])
 
@@ -413,6 +532,17 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    List tags for a resource type
+
+    * `:resource_type` - Optional (String, default: image). The type of file for which to retrieve the tags. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:prefix` - Optional. Find all tags that start with the given prefix.
+    * `:max_results` - Optional. Max number of tags to return. Default=10. Maximum=500.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_tags)
+  """
+  @spec tags(options :: Keyword.t) :: map
   def tags(options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
@@ -428,6 +558,15 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Receive list of all transformations
+
+    * `:max_results` - Optional. Max number of transformations to return. Default=10. Maximum=500.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_transformations)
+  """
+  @spec transformations(options :: Keyword.t) :: map
   def transformations(options \\ []) do
     url = "/transformations"
 
@@ -441,6 +580,15 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Receive details of a single transformation
+
+    * `:max_results` - Optional. Max number of transformations to return. Default=10. Maximum=500.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_transformation)
+  """
+  @spec transformation(id :: String.t, options :: Keyword.t) :: map
   def transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
@@ -454,6 +602,13 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Delete transformation
+    Note: Deleting a transformation also deletes all the derived images based on this transformation (up to 1000). The method returns an error if there are more than 1000 derived images based on this transformation.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#delete_transformation)
+  """
+  @spec delete_transformation(id :: String.t, options :: Keyword.t) :: map
   def delete_transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
@@ -462,6 +617,15 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Updates transformation
+
+    * `:allowed_for_strict` - Boolean. Whether this transformation is allowed when Strict Transformations are enabled.
+    * `:unsafe_update` - Optional. Allows updating an existing named transformation without updating all associated derived images (the new settings of the named transformation only take effect from now on).
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#update_transformation)
+  """
+  @spec update_transformation(id :: String.t, options :: Keyword.t) :: map
   def update_transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
@@ -470,6 +634,15 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Create named transformation
+
+    * `:name` - Name for transformation
+    * `:transformation` - String representation of transformation parameters.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#create_named_transformation)
+  """
+  @spec create_transformation(name :: String.t, transformation :: String.t) :: map
   def create_transformation(name, transformation) do
     url = "/transformations/#{name}"
 

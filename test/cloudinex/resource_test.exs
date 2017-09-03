@@ -253,7 +253,7 @@ defmodule Cloudinex.ResourceTest do
         conn
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, _body} = Cloudinex.restore(["one", "two"])
+      {:ok, _body} = Cloudinex.restore_resource(["one", "two"])
     end
   end
 
