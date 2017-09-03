@@ -21,6 +21,19 @@ defmodule Cloudinex.UploaderTest do
     {:ok, %{bypass: bypass}}
   end
 
+  test "uploads text", %{bypass: bypass} do
+    response = load_fixture("folders")
+    Bypass.expect bypass, fn conn ->
+      assert "/demo/image/text" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, body, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
+      assert body =~ "text=apple"
+      conn
+      |> Plug.Conn.resp(200, response)
+    end
+    Cloudinex.Uploader.upload_text("apple")
+  end
+
   test "uploads url", %{bypass: bypass} do
     response = load_fixture("folders")
     Bypass.expect bypass, fn conn ->
@@ -31,7 +44,7 @@ defmodule Cloudinex.UploaderTest do
       conn
       |> Plug.Conn.resp(200, response)
     end
-    Cloudinex.Uploader.upload("http://example.com/example.jpg")
+    Cloudinex.Uploader.upload_url("http://example.com/example.jpg")
   end
 
   test "uploads secure url", %{bypass: bypass} do
@@ -44,7 +57,7 @@ defmodule Cloudinex.UploaderTest do
       conn
       |> Plug.Conn.resp(200, response)
     end
-    Cloudinex.Uploader.upload("https://example.com/example.jpg")
+    Cloudinex.Uploader.upload_url("https://example.com/example.jpg")
   end
 
   test "uploads image", %{bypass: bypass} do
@@ -60,6 +73,6 @@ defmodule Cloudinex.UploaderTest do
       conn
       |> Plug.Conn.resp(200, response)
     end
-    Cloudinex.Uploader.upload("./test/fixtures/logo.png")
+    Cloudinex.Uploader.upload_file("./test/fixtures/logo.png")
   end
 end
