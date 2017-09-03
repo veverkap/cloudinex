@@ -177,13 +177,13 @@ defmodule Cloudinex.ResourceTest do
       {:ok, _body} = Cloudinex.resources_by_moderation("manual", "pending")
     end
 
-    test "resources_by_moderation/3 raises on invalid type", %{bypass: bypass} do
+    test "resources_by_moderation/3 raises on invalid type" do
       assert_raise FunctionClauseError, fn ->
         Cloudinex.resources_by_moderation("apple", "pending")
       end
     end
 
-    test "resources_by_moderation/3 raises on invalid status", %{bypass: bypass} do
+    test "resources_by_moderation/3 raises on invalid status" do
       assert_raise FunctionClauseError, fn ->
         Cloudinex.resources_by_moderation("manual", "apple")
       end
