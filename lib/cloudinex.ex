@@ -43,6 +43,10 @@ defmodule Cloudinex do
   plug Cloudinex.Middleware, enabled: Application.get_env(:cloudinex, :debug, false)
   adapter Tesla.Adapter.Hackney
 
+  @doc """
+    Returns current version of library from Mix file
+  """
+  @spec version() :: String.t
   def version, do: Project.config[:version]
   @valid_moderation_types ~w(manual webpurify aws_rek metascan)
   @valid_moderation_statuses ~w(pending approved rejected)
@@ -119,6 +123,7 @@ defmodule Cloudinex do
     ```elixir
     iex> Cloudinex.resource_types
     {:ok, %{"resource_types" => ["image"]}}
+    ```
   """
   @spec resource_types() :: {atom, map}
   def resource_types do
@@ -604,6 +609,7 @@ defmodule Cloudinex do
 
   @doc """
     Delete transformation
+
     Note: Deleting a transformation also deletes all the derived images based on this transformation (up to 1000). The method returns an error if there are more than 1000 derived images based on this transformation.
 
     [API Docs](http://cloudinary.com/documentation/admin_api#delete_transformation)
@@ -651,6 +657,15 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    List all upload mappings by folder and its mapped template (URL).
+
+    * `:max_results` - Optional. Max number of upload mappings to return. Default=10. Maximum=500.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_upload_mappings)
+  """
+  @spec upload_mappings(options :: Keyword.t) :: map
   def upload_mappings(options \\ []) do
     url = "/upload_mappings"
 
@@ -664,6 +679,14 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Details of a single upload mapping
+
+    Retrieve the mapped template (URL) of a given upload mapping folder.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_upload_mapping)
+  """
+  @spec upload_mapping(folder :: String.t) :: map
   def upload_mapping(folder) do
     url = "/upload_mappings/#{folder}"
 
@@ -672,6 +695,12 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Create a new upload mapping folder and its template (URL).
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#create_an_upload_mapping)
+  """
+  @spec create_upload_mapping(folder :: String.t, template :: String.t) :: map
   def create_upload_mapping(folder, template) do
     url = "/upload_mappings"
 
@@ -680,6 +709,12 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Delete an upload mapping by folder name.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#delete_an_upload_mapping)
+  """
+  @spec delete_upload_mapping(folder :: String.t) :: map
   def delete_upload_mapping(folder) do
     url = "/upload_mappings/#{folder}"
 
@@ -688,6 +723,16 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Update an existing upload mapping folder with a new template (URL).
+
+    Parameters:
+    * `:folder` - The name of the mapped folder.
+    * `:template` - The new URL to be mapped to the folder.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#update_an_upload_mapping)
+  """
+  @spec update_upload_mapping(folder :: String.t, template :: String.t) :: map
   def update_upload_mapping(folder, template) do
     url = "/upload_mappings"
 
@@ -698,15 +743,41 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
-  def update_access_mode_by_public_ids(public_ids, access_mode, options \\ []) do
+  @doc """
+    This method updates the access_mode of resources of a specific resource type (default = image) according to the defined conditions. When access_mode = 'authenticated', uploaded resources of type 'upload' behave as if they are of type 'authenticated'. The resource can later be made public by changing its access_mode to 'public', without having to update any image delivery URLs. In the case where public images are reverted to authenticated by changing their access_mode to 'authenticated', all the existing original and derived versions of the images are also invalidated on the CDN:
+
+    Required Parameters:
+    * `:access_mode` - The new access mode to be set ("public" or "authenticated").
+
+    One of the following:
+    * `:public_ids` - Update all resources with the given public IDs (array of up to 100 public_ids).
+    prefix - Update all resources where the public ID starts with the given prefix (up to a maximum of 100 matching original resources).
+    * `:tag` - Update all resources with the given tag (up to a maximum of 100 matching original resources).
+
+    Optional Parameters:
+    * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
+    * `:next_cursor` - Optional. When an update request has more than 100 resources to update, the response includes a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following update request.
+  """
+  @spec update_access_mode(hash :: Map.t, options :: Keyword.t) :: map
+  def update_access_mode(hash, access_mode, options \\ [])
+  def update_access_mode(%{public_ids: public_ids}, access_mode, options) when is_list(public_ids),
+    do: call_update_access_mode(options, access_mode, [public_ids: public_ids])
+  def update_access_mode(%{prefix: prefix}, access_mode, options) when is_binary(prefix),
+    do: call_update_access_mode(options, access_mode, [prefix: prefix])
+  def update_access_mode(%{tag: tag}, access_mode, options) when is_binary(tag),
+    do: call_update_access_mode(options, access_mode, [tag: tag])
+
+  defp call_update_access_mode(options, access_mode, query) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
+    {type, options} = Keyword.pop(options, :type, "upload")
 
-    url = "/resources/#{resource_type}/upload/update_access_mode"
+    url = "/resources/#{resource_type}/#{type}/update_access_mode"
 
-    keys = [:public_ids, :access_mode, :next_cursor]
+    keys = [:public_ids, :prefix, :tag, :next_cursor, :access_mode]
 
     options = options
-              |> Keyword.merge([public_ids: public_ids, access_mode: access_mode])
+              |> Keyword.merge(query)
+              |> Keyword.merge([access_mode: access_mode])
               |> remove_invalid_keys(keys)
               |> valid_member?(["public", "authenticated"], :access_mode)
 
@@ -715,6 +786,16 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Lists upload presets
+
+    Parameters:
+    * `:max_results` - Optional. Max number of upload presets to return. Default=10. Maximum=500.
+    * `:next_cursor` - Optional. When a listing request has more results to return than max_results, the next_cursor value is returned as part of the response. You can then specify this value as the next_cursor parameter of the following listing request.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_upload_presets)
+  """
+  @spec upload_presets(options :: Keyword.t) :: map
   def upload_presets(options \\ []) do
     url = "/upload_presets"
 
@@ -723,6 +804,12 @@ defmodule Cloudinex do
     |> Helpers.handle_response()
   end
 
+  @doc """
+    Retrieves the details of an upload preset.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_upload_preset)
+  """
+  @spec upload_preset(preset_name :: String.t) :: map
   def upload_preset(preset_name) do
     url = "/upload_presets/#{preset_name}"
 
@@ -731,6 +818,20 @@ defmodule Cloudinex do
     |> Helpers.handle_response()
   end
 
+  @doc """
+    Create a new upload preset.
+
+    Parameters:
+    * `:name` - The name to assign to the upload preset.
+    * `:unsigned` - Boolean. Whether this upload preset allows unsigned uploading to Cloudinary.
+    * `:disallow_public_id` - Boolean. Whether this upload preset disables assigning a public_id in the image upload call.
+    * `:settings` - The [upload actions](http://cloudinary.com/documentation/image_upload_api_reference#upload) to apply to the images uploaded with this preset.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#create_an_upload_preset)
+  """
+  @spec create_upload_preset(name :: String.t, unsigned :: boolean,
+                             disallow_public_id :: boolean,
+                             settings :: Keyword.t) :: map
   def create_upload_preset(name, unsigned, disallow_public_id, settings \\ []) do
     url = "/upload_presets"
 
@@ -742,6 +843,18 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Updates upload preset.
+
+    Parameters:
+    * `:name` - The name to assign to the upload preset.
+    * `:unsigned` - Boolean. Whether this upload preset allows unsigned uploading to Cloudinary.
+    * `:disallow_public_id` - Boolean. Whether this upload preset disables assigning a public_id in the image upload call.
+    * `:settings` - The [upload actions](http://cloudinary.com/documentation/image_upload_api_reference#upload) to apply to the images uploaded with this preset.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#update_an_upload_preset)
+  """
+  @spec update_upload_preset(name :: String.t, settings :: Keyword.t) :: map
   def update_upload_preset(name, settings \\ []) do
     url = "/upload_presets/#{name}"
 
@@ -750,6 +863,12 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Deletes upload preset
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#delete_an_upload_preset)
+  """
+  @spec delete_upload_preset(id :: String.t, options :: Keyword.t) :: map
   def delete_upload_preset(id, options \\ []) do
     url = "/upload_presets/#{id}"
 
@@ -758,6 +877,12 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    List all the root folders
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_root_folders)
+  """
+  @spec folders() :: map
   def folders do
     url = "/folders"
 
@@ -766,6 +891,12 @@ defmodule Cloudinex do
     |> Helpers.handle_response
   end
 
+  @doc """
+    Lists the name and path of all the subfolders of a given root folder.
+
+    [API Docs](http://cloudinary.com/documentation/admin_api#list_subfolders)
+  """
+  @spec folders(root_folder :: String.t) :: map
   def folders(root_folder) do
     url = "/folders/#{root_folder}"
 

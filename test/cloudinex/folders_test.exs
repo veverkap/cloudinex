@@ -13,7 +13,7 @@ defmodule Cloudinex.FoldersTest do
     {:ok, %{bypass: bypass}}
   end
 
-  describe "folders/0" do
+  describe "list_root_folders/0" do
     test "folders/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("folders")
       expect_json bypass, fn conn ->
