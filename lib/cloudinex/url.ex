@@ -1,64 +1,68 @@
 defmodule Cloudinex.Url do
+  alias Cloudinex.Helpers
   @moduledoc "A module that helps creating urls to your cloudinary image, which can optionally transform the image as well."
 
   @doc """
     Given a cloudinary public id string, this will generate an image url of where the image is hosted.
     You can also pass a map with options to apply transformations to the image, for more information see the documentation.
 
-    ## examples :
-    A url to the image at its original dimensions and no transformations
+    Examples:
 
-          iex> Cloudinex.Url.for("a_public_id")
-          "//res.cloudinary.com/my_cloud_name/image/upload/a_public_id"
-
-    A url to the image with just a signature
-
-          iex> Cloudinex.Url.for("a_public_id", %{sign_url: true})
-          "//res.cloudinary.com/my_cloud_name/image/upload/s--MXxhpIBQ--/a_public_id"
-
-    A url to the image adjusted to a specific width and height
-
-          iex> Cloudinex.Url.for("a_public_id", %{width: 400, height: 300})
-          "//res.cloudinary.com/my_cloud_name/image/upload/h_300,w_400/a_public_id"
-
-    A url to the image using multiple transformation options and a signature
-
-          iex> Cloudinex.Url.for("a_public_id", %{crop: "fill", fetch_format: 'auto', flags: 'progressive', width: 300, height: 254, quality: "jpegmini", sign_url: true})
-          "//res.cloudinary.com/my_cloud_name/image/upload/s--jwB_Ds4w--/c_fill,f_auto,fl_progressive,h_254,q_jpegmini,w_300/a_public_id"
-
-      A url to a specific version of the image
-
-          iex> Cloudinex.Url.for("a_public_id", %{version: 1471959066})
-          "//res.cloudinary.com/my_cloud_name/image/upload/v1471959066/a_public_id"
-
-      A url to a specific version of the image adjusted to a specific width and height
-
-          iex> Cloudinex.Url.for("a_public_id", %{width: 400, height: 300, version: 1471959066})
-          "//res.cloudinary.com/my_cloud_name/image/upload/h_300,w_400/v1471959066/a_public_id"
-
-      A url to the image with the file extension of the requested delivery format for the resource. The resource is delivered in the original uploaded format if the file extension is not included.
-
-          iex> Cloudinex.Url.for("a_public_id", %{format: "png"})
-          "//res.cloudinary.com/my_cloud_name/image/upload/a_public_id.png"
-
-      A url to the resource type.  If resource type not specified, "image" is the default
-
-          iex> Cloudinex.Url.for("a_public_id", %{resource_type: "video"})
-          "//res.cloudinary.com/my_cloud_name/video/upload/a_public_id"
-
-      A url with an overlay
-          iex> Cloudinex.Url.for("a_public_id", [
-          ...>   %{border: "5px_solid_rgb:c22c33", radius: 5, crop: "fill", height: 246, width: 470, quality: 80},
-          ...>   %{overlay: "my_overlay", crop: "scale", gravity: "south_east", width: 128 ,x: 5, y: 15}
-          ...> ])
-          "//res.cloudinary.com/my_cloud_name/image/upload/bo_5px_solid_rgb:c22c33,c_fill,h_246,q_80,r_5,w_470/c_scale,g_south_east,l_my_overlay,w_128,x_5,y_15/a_public_id"
-
-      A url with a face
-          iex> Cloudinex.Url.for("a_public_id", %{width: 400, height: 300, face: true})
-          "//res.cloudinary.com/my_cloud_name/image/upload/g_face,h_300,w_400/a_public_id"
+    * A url to the image at its original dimensions and no transformations
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id")
+    "//res.cloudinary.com/my_cloud_name/image/upload/a_public_id"
+    ```
+    * A url to the image with just a signature
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{sign_url: true})
+    "//res.cloudinary.com/my_cloud_name/image/upload/s--MXxhpIBQ--/a_public_id"
+    ```
+    * A url to the image adjusted to a specific width and height
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{width: 400, height: 300})
+    "//res.cloudinary.com/my_cloud_name/image/upload/h_300,w_400/a_public_id"
+    ```
+    * A url to the image using multiple transformation options and a signature
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{crop: "fill", fetch_format: 'auto', flags: 'progressive', width: 300, height: 254, quality: "jpegmini", sign_url: true})
+    "//res.cloudinary.com/my_cloud_name/image/upload/s--jwB_Ds4w--/c_fill,f_auto,fl_progressive,h_254,q_jpegmini,w_300/a_public_id"
+    ```
+     * A url to a specific version of the image
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{version: 1471959066})
+    "//res.cloudinary.com/my_cloud_name/image/upload/v1471959066/a_public_id"
+    ```
+    * A url to a specific version of the image adjusted to a specific width and height
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{width: 400, height: 300, version: 1471959066})
+    "//res.cloudinary.com/my_cloud_name/image/upload/h_300,w_400/v1471959066/a_public_id"
+    ```
+    * A url to the image with the file extension of the requested delivery format for the resource. The resource is delivered in the original uploaded format if the file extension is not included.
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{format: "png"})
+    "//res.cloudinary.com/my_cloud_name/image/upload/a_public_id.png"
+    ```
+    * A url to the resource type.  If resource type not specified, "image" is the default
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{resource_type: "video"})
+    "//res.cloudinary.com/my_cloud_name/video/upload/a_public_id"
+    ```
+    * A url with an overlay
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", [
+    ...>   %{border: "5px_solid_rgb:c22c33", radius: 5, crop: "fill", height: 246, width: 470, quality: 80},
+    ...>   %{overlay: "my_overlay", crop: "scale", gravity: "south_east", width: 128 ,x: 5, y: 15}
+    ...> ])
+    "//res.cloudinary.com/my_cloud_name/image/upload/bo_5px_solid_rgb:c22c33,c_fill,h_246,q_80,r_5,w_470/c_scale,g_south_east,l_my_overlay,w_128,x_5,y_15/a_public_id"
+    ```
+    * A url with a face
+    ```elixir
+    iex> Cloudinex.Url.for("a_public_id", %{width: 400, height: 300, face: true})
+    "//res.cloudinary.com/my_cloud_name/image/upload/g_face,h_300,w_400/a_public_id"
+    ```
   """
-  @spec for(String.t) :: String.t
-  @spec for(String.t, Map.t) :: String.t
+  @spec for(public_id :: String.t, options :: Map.t) :: String.t
   def for(public_id, options \\ %{}) do
     transformations = transformation_string_from(options)
 
@@ -71,7 +75,7 @@ defmodule Cloudinex.Url do
       version_for(options),
       public_id
     ]
-    |> Enum.reject(& &1 == nil)
+    |> Enum.reject(&(&1 == nil))
     |> Enum.join("/")
     |> append_format(options)
   end
@@ -81,15 +85,18 @@ defmodule Cloudinex.Url do
   end
 
   defp signature_for(public_id, %{sign_url: true}, transformations) do
-    to_sign = transformations <> "/#{public_id}#{secret()}"
-    signature = :crypto.hash(:sha, to_sign)
-    |> Base.encode64
-    |> String.slice(0..7)
-    |> String.replace("+", "-")
-    |> String.replace("/", "_")
-    "s--" <> signature <> "--"
-  end
+    to_sign = "#{transformations}/#{public_id}#{secret()}"
 
+    signature =
+      to_sign
+      |> Helpers.crypto_hash()
+      |> Base.encode64
+      |> String.slice(0..7)
+      |> String.replace("+", "-")
+      |> String.replace("/", "_")
+
+    "s--#{signature}--"
+  end
   defp signature_for(_, _, _), do: nil
 
   defp version_for(%{version: version}) when is_integer(version), do: "v#{version}"
@@ -101,7 +108,11 @@ defmodule Cloudinex.Url do
   defp format(%{format: format}), do: ".#{format}"
   defp format(_), do: ""
 
-  defp transformation_string_from(options) when is_list(options), do: Enum.map(options, &transformation_string_from/1) |> Enum.join("/")
+  defp transformation_string_from(options) when is_list(options) do
+    options
+    |> Enum.map(&transformation_string_from/1)
+    |> Enum.join("/")
+  end
   defp transformation_string_from(options) when is_map(options) do
     options
     |> Enum.sort()
@@ -120,35 +131,35 @@ defmodule Cloudinex.Url do
     end)
   end
 
-  defp process_option(:width, value), do: ["w_#{value}"]
-  defp process_option(:height, value), do: ["h_#{value}"]
-  defp process_option(:crop, value), do: ["c_#{value}"]
   defp process_option(:aspect_ratio, value), do: ["ar_#{value}"]
-  defp process_option(:gravity, value), do: ["g_#{value}"]
-  defp process_option(:zoom, value), do: ["z_#{value}"]
-  defp process_option(:x, value), do: ["x_#{value}"]
-  defp process_option(:y, value), do: ["y_#{value}"]
-  defp process_option(:fetch_format, value), do: ["f_#{value}"]
-  defp process_option(:quality, value), do: ["q_#{value}"]
-  defp process_option(:radius, value), do: ["r_#{value}"]
-  defp process_option(:effect, value), do: ["e_#{value}"]
-  defp process_option(:opacity, value), do: ["o_#{value}"]
   defp process_option(:border, value), do: ["bo_#{value}"]
-  defp process_option(:overlay, value), do: ["l_#{value}"]
-  defp process_option(:underlay, value), do: ["u_#{value}"]
-  defp process_option(:default_image, value), do: ["d_#{value}"]
-  defp process_option(:delay, value), do: ["dl_#{value}"]
   defp process_option(:color, value), do: ["c_#{value}"]
   defp process_option(:coulor, value), do: ["c_#{value}"]
-  defp process_option(:dpr, value), do: ["dpr_#{value}"]
+  defp process_option(:crop, value), do: ["c_#{value}"]
+  defp process_option(:default_image, value), do: ["d_#{value}"]
+  defp process_option(:delay, value), do: ["dl_#{value}"]
   defp process_option(:density, value), do: ["dn_#{value}"]
-  defp process_option(:flags, value), do: ["fl_#{value}"]
-  defp process_option(:transformation, value), do: ["t_#{value}"]
+  defp process_option(:dpr, value), do: ["dpr_#{value}"]
+  defp process_option(:effect, value), do: ["e_#{value}"]
   defp process_option(:face, true), do: ["g_face"]
+  defp process_option(:fetch_format, value), do: ["f_#{value}"]
+  defp process_option(:flags, value), do: ["fl_#{value}"]
+  defp process_option(:gravity, value), do: ["g_#{value}"]
+  defp process_option(:height, value), do: ["h_#{value}"]
+  defp process_option(:opacity, value), do: ["o_#{value}"]
+  defp process_option(:overlay, value), do: ["l_#{value}"]
+  defp process_option(:quality, value), do: ["q_#{value}"]
+  defp process_option(:radius, value), do: ["r_#{value}"]
+  defp process_option(:transformation, value), do: ["t_#{value}"]
+  defp process_option(:underlay, value), do: ["u_#{value}"]
+  defp process_option(:width, value), do: ["w_#{value}"]
+  defp process_option(:x, value), do: ["x_#{value}"]
+  defp process_option(:y, value), do: ["y_#{value}"]
+  defp process_option(:zoom, value), do: ["z_#{value}"]
   defp process_option(_, _), do: []
 
   defp secret, do: Application.get_env(:cloudinex, :secret)
   defp base_url do
-    "#{Application.get_env(:cloudinex, :base_url)}#{Application.get_env(:cloudinex, :cloud_name)}"
+    "#{Application.get_env(:cloudinex, :base_image_url)}#{Application.get_env(:cloudinex, :cloud_name)}"
   end
 end

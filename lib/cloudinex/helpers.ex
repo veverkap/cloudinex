@@ -137,14 +137,14 @@ defmodule Cloudinex.Helpers do
     })
   end
 
+  def crypto_hash(query), do: :crypto.hash(:sha, query)
+
   defp sha(query) do
     query
-    |> hash
+    |> crypto_hash
     |> Base.encode16
     |> String.downcase
   end
-
-  defp hash(query), do: :crypto.hash(:sha, query)
 
   defp current_time do
     system_time()
