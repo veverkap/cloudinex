@@ -85,7 +85,7 @@ defmodule Cloudinex.Url do
   end
 
   defp signature_for(public_id, %{sign_url: true}, transformations) do
-    to_sign = "#{transformations}/#{public_id}#{secret()}"
+    to_sign = "#{transformations}/#{public_id}#{Helpers.secret()}"
 
     signature =
       to_sign
@@ -158,8 +158,7 @@ defmodule Cloudinex.Url do
   defp process_option(:zoom, value), do: ["z_#{value}"]
   defp process_option(_, _), do: []
 
-  defp secret, do: Application.get_env(:cloudinex, :secret)
   defp base_url do
-    "#{Application.get_env(:cloudinex, :base_image_url)}#{Application.get_env(:cloudinex, :cloud_name)}"
+    Helpers.base_image_url <> Helpers.cloud_name
   end
 end

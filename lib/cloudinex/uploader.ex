@@ -9,11 +9,11 @@ defmodule Cloudinex.Uploader do
   """
   use Tesla, docs: false
   require Logger
-  alias Cloudinex.Helpers
+  alias Cloudinex.{Helpers, Validation}
 
   plug Tesla.Middleware.BaseUrl, base_url()
-  plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
-                                   password: Application.get_env(:cloudinex, :secret)
+  plug Tesla.Middleware.BasicAuth, username: Helpers.api_key(),
+                                   password: Helpers.secret()
   plug Cloudinex.Middleware, enabled: false
   plug Tesla.Middleware.FormUrlencoded
   adapter Tesla.Adapter.Hackney
@@ -79,17 +79,19 @@ defmodule Cloudinex.Uploader do
     [API Docs](http://cloudinary.com/documentation/upload_images#uploading_with_a_direct_call_to_the_api)
   """
   @spec upload_url(url :: String.t, options :: Map.t) :: {atom, Map.t}
-  def upload_url(url, opts \\ %{}) do
-    params =
-      opts
-      |> Map.merge(%{file: url})
-      |> Helpers.prepare_opts
-      |> Helpers.sign
-      |> URI.encode_query
+  def upload_url(url, options \\ %{}) do
+    with {:ok, options} <- Validation.validate_upload_options(options) do
+      params =
+        options
+        |> Map.merge(%{file: url})
+        |> Helpers.prepare_opts
+        |> Helpers.sign
+        |> URI.encode_query
 
-    client()
-    |> post("/image/upload", params)
-    |> Helpers.handle_json_response
+      client()
+      |> post("/image/upload", params)
+      |> Helpers.handle_json_response
+    end
   end
 
   @doc """
@@ -158,6 +160,6 @@ defmodule Cloudinex.Uploader do
   end
 
   defp base_url do
-    "#{Application.get_env(:cloudinex, :base_url)}#{Application.get_env(:cloudinex, :cloud_name)}"
+    Helpers.base_url() <> Helpers.cloud_name
   end
 end

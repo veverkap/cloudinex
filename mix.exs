@@ -48,7 +48,7 @@ defmodule Cloudinex.Mixfile do
       {:credo, "~> 0.8", only: [:dev, :test]},
       {:excoveralls, "~> 0.7", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:ex_guard, "~> 1.2", only: :dev},
+      {:ex_guard, "~> 1.3", only: :dev},
       {:plug, "~> 1.4", only: [:dev, :test]},
     ]
   end

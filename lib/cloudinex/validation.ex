@@ -1,6 +1,11 @@
 defmodule Cloudinex.Validation do
   @moduledoc false
   require Logger
+
+  def validate_upload_options(options) do
+    {:error, "Invalid options"}
+  end
+
   def remove_invalid_keys(list, valid_keys) when is_list(list) do
     Keyword.take(list, valid_keys)
   end

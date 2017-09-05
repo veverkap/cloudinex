@@ -37,10 +37,10 @@ defmodule Cloudinex do
   import Cloudinex.Validation
 
   plug Tesla.Middleware.BaseUrl, base_url()
-  plug Tesla.Middleware.BasicAuth, username: Application.get_env(:cloudinex, :api_key),
-                                   password: Application.get_env(:cloudinex, :secret)
+  plug Tesla.Middleware.BasicAuth, username: Helpers.api_key(),
+                                   password: Helpers.secret()
   plug Tesla.Middleware.JSON
-  plug Cloudinex.Middleware, enabled: Application.get_env(:cloudinex, :debug, false)
+  plug Cloudinex.Middleware, enabled: Helpers.debug?()
   adapter Tesla.Adapter.Hackney
 
   @doc """

@@ -89,10 +89,12 @@ defmodule Cloudinex.Helpers do
     message = Kernel.get_in(body, ["error", "message"])
     {:error, "Bad Request: #{message}"}
   end
-  def handle_response(%{status: 401}), do: {:error, "Invalid Credentials: Please check your api_key and secret"}
-  def handle_response(%{status: 403}), do: {:error, "Invalid Credentials: Please check your api_key and secret"}
-  def handle_response(%{status: 404}), do: {:error, "Resource not found"}
-
+  def handle_response(%{status: 401}),
+    do: {:error, "Invalid Credentials: Please check your api_key and secret"}
+  def handle_response(%{status: 403}),
+    do: {:error, "Invalid Credentials: Please check your api_key and secret"}
+  def handle_response(%{status: 404}),
+    do: {:error, "Resource not found"}
   # This should really be a 429, but they are using 420
   def handle_response(%{status: 420, headers: headers}) do
     reset_date = Map.get(headers, "x-featureratelimit-reset", "unknown date")
@@ -137,7 +139,38 @@ defmodule Cloudinex.Helpers do
     })
   end
 
+  @spec crypto_hash(query :: String.t) :: String.t
   def crypto_hash(query), do: :crypto.hash(:sha, query)
+
+  @spec api_key :: String.t
+  def api_key, do: Application.get_env(:cloudinex, :api_key)
+
+  @spec base_image_url :: String.t
+  def base_image_url do
+    Application.get_env(
+      :cloudinex,
+      :base_image_url,
+      "https://res.cloudinary.com/"
+    )
+  end
+
+  @spec base_url :: String.t
+  def base_url do
+    Application.get_env(
+      :cloudinex,
+      :base_url,
+      "https://api.cloudinary.com/v1_1/"
+    )
+  end
+
+  @spec cloud_name :: String.t
+  def cloud_name, do: Application.get_env(:cloudinex, :cloud_name)
+
+  @spec debug? :: String.t
+  def debug?, do: Application.get_env(:cloudinex, :debug, false)
+
+  @spec secret :: String.t
+  def secret, do: Application.get_env(:cloudinex, :secret)
 
   defp sha(query) do
     query
