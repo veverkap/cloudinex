@@ -10,7 +10,7 @@ defmodule Cloudinex.Uploader do
   use Tesla, docs: false
   require Logger
   alias Cloudinex.{Helpers, Validation}
-
+  alias Tesla.Multipart
   plug Tesla.Middleware.BaseUrl, base_url()
   plug Tesla.Middleware.BasicAuth, username: Helpers.api_key(),
                                    password: Helpers.secret()
@@ -80,7 +80,7 @@ defmodule Cloudinex.Uploader do
   """
   @spec upload_url(url :: String.t, options :: Map.t) :: {atom, Map.t}
   def upload_url(url, options \\ %{}) do
-    with {:ok, options} <- Validation.validate_upload_options(options) do
+    # with {:ok, options} <- Validation.validate_upload_options(options) do
       params =
         options
         |> Map.merge(%{file: url})
@@ -91,7 +91,7 @@ defmodule Cloudinex.Uploader do
       client()
       |> post("/image/upload", params)
       |> Helpers.handle_json_response
-    end
+    # end
   end
 
   @doc """
@@ -121,17 +121,19 @@ defmodule Cloudinex.Uploader do
   """
   @spec upload_file(file_path :: String.t, options :: Map.t) :: {atom, Map.t}
   def upload_file(file_path, options \\ %{}) do
-    generate_upload_keys(options)
+    options
+    |> generate_upload_keys
     |> file_upload(file_path)
   end
 
   defp file_upload(%{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp}, file_path) do
-    mp = Tesla.Multipart.new
-         |> Tesla.Multipart.add_content_type_param("application/x-www-form-urlencoded")
-         |> Tesla.Multipart.add_field("api_key", api_key)
-         |> Tesla.Multipart.add_field("signature", signature)
-         |> Tesla.Multipart.add_field("timestamp", timestamp)
-         |> Tesla.Multipart.add_file(file_path)
+
+    mp = Multipart.new
+         |> Multipart.add_content_type_param("application/x-www-form-urlencoded")
+         |> Multipart.add_field("api_key", api_key)
+         |> Multipart.add_field("signature", signature)
+         |> Multipart.add_field("timestamp", timestamp)
+         |> Multipart.add_file(file_path)
 
     client()
     |> post("/image/upload", mp)
