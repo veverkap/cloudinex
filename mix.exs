@@ -42,7 +42,7 @@ defmodule Cloudinex.Mixfile do
     [
       {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
-      {:tesla, "~> 0.7"},
+      {:tesla, "~> 0.8"},
 
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},

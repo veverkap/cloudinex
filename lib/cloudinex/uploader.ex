@@ -119,40 +119,30 @@ defmodule Cloudinex.Uploader do
 
     [API Docs](http://cloudinary.com/documentation/upload_images#uploading_with_a_direct_call_to_the_api)
   """
-  @spec upload_url(url :: String.t, options :: Map.t) :: {atom, Map.t}
-  def upload_file(file_path, opts \\ %{}) do
-    file_path
-    |> generate_upload_body(opts)
-    |> file_upload
+  @spec upload_file(file_path :: String.t, options :: Map.t) :: {atom, Map.t}
+  def upload_file(file_path, options \\ %{}) do
+    generate_upload_keys(options)
+    |> file_upload(file_path)
   end
 
-  defp generate_upload_body(file_path, opts) do
-    {
-      :multipart,
-      (
-        opts
-        |> Helpers.prepare_opts
-        |> Helpers.sign
-        |> Helpers.unify
-        |> Map.to_list
-      ) ++ [{:file, file_path}]
-    }
+  defp file_upload(%{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp}, file_path) do
+    mp = Tesla.Multipart.new
+         |> Tesla.Multipart.add_content_type_param("application/x-www-form-urlencoded")
+         |> Tesla.Multipart.add_field("api_key", api_key)
+         |> Tesla.Multipart.add_field("signature", signature)
+         |> Tesla.Multipart.add_field("timestamp", timestamp)
+         |> Tesla.Multipart.add_file(file_path)
+
+    client()
+    |> post("/image/upload", mp)
+    |> Helpers.handle_json_response
   end
 
-  defp file_upload(body) do
-    headers = [
-      {"Content-Type", "application/x-www-form-urlencoded"},
-      {"Accept", "application/json"},
-      {"user-agent", "cloudinex/#{Cloudinex.version}"}
-    ]
-    {:ok, raw_response} = HTTPoison.request(
-      :post,
-      "#{base_url()}/image/upload",
-      body,
-      headers
-    )
-    {:ok, response} = Poison.decode(raw_response.body)
-    response
+  defp generate_upload_keys(options) do
+    options
+    |> Helpers.prepare_opts
+    |> Helpers.sign
+    |> Helpers.unify
   end
 
   defp client do

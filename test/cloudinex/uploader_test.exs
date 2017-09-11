@@ -34,51 +34,56 @@ defmodule Cloudinex.UploaderTest do
     Cloudinex.Uploader.upload_text("apple")
   end
 
-  describe "uploads url" do
-    # test "uploads url", %{bypass: bypass} do
-    #   response = load_fixture("folders")
-    #   Bypass.expect bypass, fn conn ->
-    #     assert "/demo/image/upload" == conn.request_path
-    #     assert "POST" == conn.method
-    #     {:ok, body, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
-    #     assert body =~ "example.jpg"
-    #     conn
-    #     |> Plug.Conn.resp(200, response)
-    #   end
-    #   Cloudinex.Uploader.upload_url("http://example.com/example.jpg")
-    # end
-
-    test "uploads url validating options" do
-      {:error, "Invalid options"} = Cloudinex.Uploader.upload_url("http://example.com/example.jpg", %{dog: "butter"})
+  test "uploads url", %{bypass: bypass} do
+    response = load_fixture("folders")
+    Bypass.expect bypass, fn conn ->
+      assert "/demo/image/upload" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, body, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
+      assert body =~ "example.jpg"
+      conn
+      |> Plug.Conn.resp(200, response)
     end
+    Cloudinex.Uploader.upload_url("http://example.com/example.jpg")
   end
 
-  # test "uploads secure url", %{bypass: bypass} do
-  #   response = load_fixture("folders")
-  #   Bypass.expect bypass, fn conn ->
-  #     assert "/demo/image/upload" == conn.request_path
-  #     assert "POST" == conn.method
-  #     {:ok, body, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
-  #     assert body =~ "example.jpg"
-  #     conn
-  #     |> Plug.Conn.resp(200, response)
-  #   end
-  #   Cloudinex.Uploader.upload_url("https://example.com/example.jpg")
-  # end
+  test "uploads secure url", %{bypass: bypass} do
+    response = load_fixture("folders")
+    Bypass.expect bypass, fn conn ->
+      assert "/demo/image/upload" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, body, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
+      assert body =~ "example.jpg"
+      conn
+      |> Plug.Conn.resp(200, response)
+    end
+    Cloudinex.Uploader.upload_url("https://example.com/example.jpg")
+  end
 
-  # test "uploads image", %{bypass: bypass} do
-  #   response = load_fixture("folders")
-  #   Bypass.expect bypass, fn conn ->
-  #     assert "/demo/image/upload" == conn.request_path
-  #     assert "POST" == conn.method
-  #     {:ok, _, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
-  #     assert Enum.any?(conn.req_headers, fn({a,b}) ->
-  #       a == "content-length" && b == "8376"
-  #     end)
+  test "uploads data:uri", %{bypass: bypass} do
+    value = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+    response = load_fixture("folders")
+    Bypass.expect bypass, fn conn ->
+      assert "/demo/image/upload" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, body, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
+      assert body =~ "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4"
+      conn
+      |> Plug.Conn.resp(200, response)
+    end
+    Cloudinex.Uploader.upload_url(value)
+  end
 
-  #     conn
-  #     |> Plug.Conn.resp(200, response)
-  #   end
-  #   Cloudinex.Uploader.upload_file("./test/fixtures/logo.png")
-  # end
+  test "uploads image", %{bypass: bypass} do
+    response = load_fixture("folders")
+    Bypass.expect bypass, fn conn ->
+      assert "/demo/image/upload" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, _, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
+
+      conn
+      |> Plug.Conn.resp(200, response)
+    end
+    Cloudinex.Uploader.upload_file("./test/fixtures/logo.png")
+  end
 end
