@@ -70,6 +70,49 @@ defmodule CloudinexTest do
     end
   end
 
+  describe "ping!/0" do
+    test "ping!/0 returns proper response", %{bypass: bypass} do
+      response = load_fixture("ping")
+      expect_json bypass, fn conn ->
+        assert "/demo/ping" == conn.request_path
+        assert "GET" == conn.method
+        conn
+        |> Plug.Conn.resp(200, response)
+      end
+      %{"status" => "ok"} = Cloudinex.ping!
+    end
+
+    test "ping!/0 handles rate limit", %{bypass: bypass} do
+      expect_json bypass, fn conn ->
+        assert "/demo/ping" == conn.request_path
+        assert "GET" == conn.method
+        conn
+        |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Limit", "500")
+        |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Remaining", "0")
+        |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Reset", "Wed, 03 Oct 2012 08:00:00 GMT")
+        |> Plug.Conn.resp(420, ~s<{ "error": { "message": "Rate limit reached" } }>)
+      end
+      assert_raise RuntimeError, "Your rate limit will be reset on Wed, 03 Oct 2012 08:00:00 GMT", fn ->
+        Cloudinex.ping!
+      end
+    end
+
+    test "ping!/0 invalid credentials", %{bypass: bypass} do
+      expect_json bypass, fn conn ->
+        assert "/demo/ping" == conn.request_path
+        assert "GET" == conn.method
+        conn
+        |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Limit", "500")
+        |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Remaining", "0")
+        |> Plug.Conn.put_resp_header("X-FeatureRateLimit-Reset", "Wed, 03 Oct 2012 08:00:00 GMT")
+        |> Plug.Conn.resp(401, ~s<{"error":{"message":"Invalid credentials"}}>)
+      end
+      assert_raise RuntimeError, "Invalid Credentials: Please check your api_key and secret", fn ->
+        Cloudinex.ping!
+      end
+    end
+  end
+
   describe "usage/0" do
     test "usage/0 returns proper response", %{bypass: bypass} do
       response = load_fixture("usage")
@@ -79,7 +122,7 @@ defmodule CloudinexTest do
         conn
         |> Plug.Conn.resp(200, response)
       end
-      usage = Cloudinex.usage
+      Cloudinex.usage
     end
   end
 

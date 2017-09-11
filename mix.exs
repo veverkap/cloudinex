@@ -1,9 +1,11 @@
 defmodule Cloudinex.Mixfile do
   use Mix.Project
 
+  @version "0.2.1"
+
   def project do
     [app: :cloudinex,
-     version: "0.2.1",
+     version: @version,
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -40,13 +42,13 @@ defmodule Cloudinex.Mixfile do
     [
       {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
-      {:tesla, "~> 0.7"},
+      {:tesla, "~> 0.8"},
 
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},
       {:excoveralls, "~> 0.7", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:ex_guard, "~> 1.2", only: :dev},
+      {:ex_guard, "~> 1.3", only: :dev},
       {:plug, "~> 1.4", only: [:dev, :test]},
     ]
   end

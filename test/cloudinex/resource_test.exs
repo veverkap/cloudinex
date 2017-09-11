@@ -177,26 +177,16 @@ defmodule Cloudinex.ResourceTest do
       {:ok, _body} = Cloudinex.resources_by_moderation("manual", "pending")
     end
 
-    test "resources_by_moderation/3 skips invalid type", %{bypass: bypass} do
-      response = load_fixture("resources/image/context/key_apple")
-      expect_json bypass, fn conn ->
-        assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
-        assert "GET" == conn.method
-        conn
-        |> Plug.Conn.resp(200, response)
+    test "resources_by_moderation/3 raises on invalid type" do
+      assert_raise FunctionClauseError, fn ->
+        Cloudinex.resources_by_moderation("apple", "pending")
       end
-      {:ok, _body} = Cloudinex.resources_by_moderation("apple", "pending")
     end
 
-    test "resources_by_moderation/3 skips valid status", %{bypass: bypass} do
-      response = load_fixture("resources/image/context/key_apple")
-      expect_json bypass, fn conn ->
-        assert "/demo/resources/image/moderations/manual/pending" == conn.request_path
-        assert "GET" == conn.method
-        conn
-        |> Plug.Conn.resp(200, response)
+    test "resources_by_moderation/3 raises on invalid status" do
+      assert_raise FunctionClauseError, fn ->
+        Cloudinex.resources_by_moderation("manual", "apple")
       end
-      {:ok, _body} = Cloudinex.resources_by_moderation("manual", "apple")
     end
   end
 
@@ -228,8 +218,8 @@ defmodule Cloudinex.ResourceTest do
     end
   end
 
-  describe "update_access_mode_by_public_ids/3" do
-    test "update_access_mode_by_public_ids/3 returns proper response", %{bypass: bypass} do
+  describe "update_access_mode/3" do
+    test "update_access_mode/3 returns proper response w public_ids", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/update_access_mode")
       expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
@@ -238,19 +228,31 @@ defmodule Cloudinex.ResourceTest do
         conn
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, _} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin"], "public")
+      {:ok, _} = Cloudinex.update_access_mode(%{public_ids: ["bfch0noutwapaasvenin"]}, "public")
     end
 
-    test "update_access_mode_by_public_ids/3 returns proper response for multiples", %{bypass: bypass} do
+    test "update_access_mode/3 returns proper response w tags", %{bypass: bypass} do
       response = load_fixture("resources/image/upload/update_access_mode")
       expect_json bypass, fn conn ->
         assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
         assert "PUT" == conn.method
-        assert "public_ids%5B%5D=bfch0noutwapaasvenin&public_ids%5B%5D=abcsd&access_mode=public" == conn.query_string
+        assert "tag=tag&access_mode=public" == conn.query_string
         conn
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, _} = Cloudinex.update_access_mode_by_public_ids(["bfch0noutwapaasvenin", "abcsd"], "public")
+      {:ok, _} = Cloudinex.update_access_mode(%{tag: "tag"}, "public")
+    end
+
+    test "update_access_mode/3 returns proper response w prefix", %{bypass: bypass} do
+      response = load_fixture("resources/image/upload/update_access_mode")
+      expect_json bypass, fn conn ->
+        assert "/demo/resources/image/upload/update_access_mode" == conn.request_path
+        assert "PUT" == conn.method
+        assert "prefix=tag&access_mode=public" == conn.query_string
+        conn
+        |> Plug.Conn.resp(200, response)
+      end
+      {:ok, _} = Cloudinex.update_access_mode(%{prefix: "tag"}, "public")
     end
   end
 
@@ -263,7 +265,7 @@ defmodule Cloudinex.ResourceTest do
         conn
         |> Plug.Conn.resp(200, response)
       end
-      {:ok, _body} = Cloudinex.restore(["one", "two"])
+      {:ok, _body} = Cloudinex.restore_resource(["one", "two"])
     end
   end
 
