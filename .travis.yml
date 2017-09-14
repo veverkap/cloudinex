@@ -8,11 +8,8 @@ otp_release:
 sudo: false
 install:
   - mix do local.hex --force, local.rebar --force
-  - mix deps.get # need to explicitly get test deps, see mix.exs
-  - mix compile
-env:
-  - MIX_ENV=test
-script: mix coveralls.travis
-after_script:
-  - mix deps.get --only docs
-  - MIX_ENV=docs mix inch.report
+  - MIX_ENV=test mix deps.get # need to explicitly get test deps, see mix.exs
+  - MIX_ENV=test mix do compile --warnings-as-errors
+script: MIX_ENV=test mix do coveralls.travis, coveralls.json
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
