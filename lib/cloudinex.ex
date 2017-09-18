@@ -32,7 +32,7 @@ defmodule Cloudinex do
   """
   use Tesla, docs: false
   require Logger
-  alias Cloudinex.{Helpers, Usage}
+  alias Cloudinex.Helpers
   alias Mix.Project
   import Cloudinex.Validation
 
@@ -92,16 +92,15 @@ defmodule Cloudinex do
 
     ```elixir
     iex> a = Cloudinex.usage
-    %Cloudinex.Usage{
-      bandwidth: %Cloudinex.UsageDetail{limit: 6442450944, usage: 3927186, used_percent: 0.06},
-      derived_resources: 167,
-      last_updated: "2017-08-29",
-      objects: %Cloudinex.UsageDetail{limit: 125000, usage: 230, used_percent: 0.18},
-      plan: "Free",
-      requests: 230,
-      resources: 63,
-      storage: %Cloudinex.UsageDetail{limit: 2671771648, usage: 23139073, used_percent: 0.87},
-      transformations: %Cloudinex.UsageDetail{limit: 7500, usage: 39, used_percent: 0.52}}
+    %{"bandwidth" => %{"limit" => 6442450944, "usage" => 6357564,
+    "used_percent" => 0.1}, "derived_resources" => 174,
+    "last_updated" => "2017-09-17",
+    "objects" => %{"limit" => 125000, "usage" => 256, "used_percent" => 0.2},
+    "plan" => "Free", "requests" => 248, "resources" => 82,
+    "storage" => %{"limit" => 2671771648, "usage" => 29788466,
+    "used_percent" => 1.11},
+    "transformations" => %{"limit" => 7500, "usage" => 78,
+    "used_percent" => 1.04}}
 
     iex> a.bandwidth.limit
     6442450944
@@ -109,12 +108,11 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#usage_report)
   """
-  @spec usage() :: %Usage{}
+  @spec usage() :: map
   def usage do
     client()
     |> get("/usage")
     |> Helpers.handle_bang_response
-    |> Usage.new
   end
 
   @doc """

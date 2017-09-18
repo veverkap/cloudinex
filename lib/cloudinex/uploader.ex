@@ -9,7 +9,7 @@ defmodule Cloudinex.Uploader do
   """
   use Tesla, docs: false
   require Logger
-  alias Cloudinex.{Helpers, Validation}
+  alias Cloudinex.Helpers
   alias Tesla.Multipart
   plug Tesla.Middleware.BaseUrl, base_url()
   plug Tesla.Middleware.BasicAuth, username: Helpers.api_key(),

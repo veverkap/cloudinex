@@ -2,7 +2,7 @@ defmodule Cloudinex.Validation do
   @moduledoc false
   require Logger
 
-  def validate_upload_options(options) do
+  def validate_upload_options(_) do
     {:error, "Invalid options"}
   end
 
