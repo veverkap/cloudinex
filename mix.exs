@@ -40,7 +40,6 @@ defmodule Cloudinex.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 0.11.0"},
       {:poison, ">= 1.0.0"},
       {:tesla, "~> 0.8"},
 
