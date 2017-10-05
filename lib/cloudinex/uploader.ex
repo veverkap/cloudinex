@@ -126,14 +126,12 @@ defmodule Cloudinex.Uploader do
     |> file_upload(file_path)
   end
 
-  defp file_upload(%{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp}, file_path) do
-
+  defp file_upload(%{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp} = options, file_path) do
     mp = Multipart.new
          |> Multipart.add_content_type_param("application/x-www-form-urlencoded")
-         |> Multipart.add_field("api_key", api_key)
-         |> Multipart.add_field("signature", signature)
-         |> Multipart.add_field("timestamp", timestamp)
          |> Multipart.add_file(file_path)
+
+    mp = Enum.reduce(options, mp, fn({key, value}, acc) -> Multipart.add_field(acc, key, value) end)
 
     client()
     |> post("/image/upload", mp)

@@ -129,8 +129,9 @@ defmodule Cloudinex.Helpers do
       |> Enum.sort
       |> Enum.join("&")
 
-    signature = (data_without_secret <> Application.get_env(:cloudinex, :secret))
-              |> sha
+    signature =
+      (data_without_secret <> Application.get_env(:cloudinex, :secret))
+      |> sha
 
     Map.merge(data, %{
       "timestamp" => timestamp,
