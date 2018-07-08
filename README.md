@@ -38,7 +38,7 @@ iex> Cloudinex.Uploader.upload_url("http://example.com/example.jpg")
 ### From local file
 
 ```elixir
-iex> Cloudinex.Uploader.upload_url("./path/to/file.jpg")
+iex> Cloudinex.Uploader.upload_file("./path/to/file.jpg")
 {:ok,
   %{"bytes" => 228821,
     "created_at" => "2017-09-03T20:43:45Z",
