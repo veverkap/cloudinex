@@ -96,4 +96,17 @@ defmodule Cloudinex.UploaderTest do
 
     Cloudinex.Uploader.upload_file("./test/fixtures/logo.png")
   end
+
+  test "uploads video", %{bypass: bypass} do
+    response = load_fixture("folders")
+    Bypass.expect bypass, fn conn ->
+      assert "/demo/video/upload" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, _, conn} = Plug.Conn.read_body(conn, length: 1_000_000)
+
+      conn
+      |> Plug.Conn.resp(200, response)
+    end
+    Cloudinex.Uploader.upload_file("./test/fixtures/logo.png", %{"type": "video"})
+  end
 end
