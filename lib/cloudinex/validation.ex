@@ -24,7 +24,8 @@ defmodule Cloudinex.Validation do
     end
   end
 
-  def valid_float_range?(list, key, low, high) when is_list(list) and is_float(low) and is_float(high) do
+  def valid_float_range?(list, key, low, high)
+      when is_list(list) and is_float(low) and is_float(high) do
     case is_float(list[key]) and list[key] >= low and list[key] <= high do
       true -> list
       false -> Keyword.delete(list, key)

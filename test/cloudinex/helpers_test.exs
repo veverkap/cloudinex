@@ -61,97 +61,129 @@ defmodule Cloudinex.HelpersTest do
 
   describe "handle_response/1" do
     test "handle_response/1 200" do
-      response = %{status: 200, body: "squirrel"}
+      response = {:ok, %{status: 200, body: "squirrel"}}
       assert {:ok, "squirrel"} == Helpers.handle_response(response)
     end
 
     test "handle_response/1 400" do
       body = %{"error" => %{"message" => "squirrel"}}
-      response = %{status: 400, body: body}
+      response = {:ok, %{status: 400, body: body}}
       assert {:error, "Bad Request: squirrel"} == Helpers.handle_response(response)
     end
 
     test "handle_response/1 401" do
-      response = %{status: 401}
-      assert {:error, "Invalid Credentials: Please check your api_key and secret"} == Helpers.handle_response(response)
+      response = {:ok, %{status: 401}}
+
+      assert {:error, "Invalid Credentials: Please check your api_key and secret"} ==
+               Helpers.handle_response(response)
     end
 
     test "handle_response/1 403" do
-      response = %{status: 403}
-      assert {:error, "Invalid Credentials: Please check your api_key and secret"} == Helpers.handle_response(response)
+      response = {:ok, %{status: 403}}
+
+      assert {:error, "Invalid Credentials: Please check your api_key and secret"} ==
+               Helpers.handle_response(response)
     end
 
     test "handle_response/1 404" do
-      response = %{status: 404}
+      response = {:ok, %{status: 404}}
       assert {:error, "Resource not found"} == Helpers.handle_response(response)
     end
 
     test "handle_response/1 420" do
-      response = %{status: 420, headers: %{}}
-      assert {:error, "Your rate limit will be reset on unknown date"} == Helpers.handle_response(response)
+      response = {:ok, %Tesla.Env{status: 420, headers: []}}
+
+      assert {:error, "Your rate limit will be reset on unknown date"} ==
+               Helpers.handle_response(response)
     end
 
     test "handle_response/1 420 with header set" do
-      response = %{status: 420, headers: %{"x-featureratelimit-reset" => "squirrel"}}
-      assert {:error, "Your rate limit will be reset on squirrel"} == Helpers.handle_response(response)
+      response =
+        {:ok, %Tesla.Env{status: 420, headers: [{"x-featureratelimit-reset", "squirrel"}]}}
+
+      assert {:error, "Your rate limit will be reset on squirrel"} ==
+               Helpers.handle_response(response)
     end
 
     test "handle_response/1 500" do
-      response = %{status: 500, body: "squirrel"}
+      response = {:ok, %{status: 500, body: "squirrel"}}
       assert {:error, "General Error: squirrel"} == Helpers.handle_response(response)
     end
 
     test "handle_response/1 419" do
-      response = %{status: 419, body: "squirrel"}
+      response = {:ok, %{status: 419, body: "squirrel"}}
       assert {:error, "squirrel"} == Helpers.handle_response(response)
+    end
+
+    test "handle_response/1 755" do
+      response = {:ok, %{status: 755}}
+
+      assert {:error, "Unhandled response from Cloudinary %{status: 755}"} ==
+               Helpers.handle_response(response)
     end
   end
 
   describe "handle_json_response/1" do
     test "handle_json_response/1 200" do
-      response = %{status: 200, body: Poison.encode!("squirrel")}
+      response = {:ok, %{status: 200, body: Poison.encode!("squirrel")}}
       assert {:ok, "squirrel"} == Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 400" do
-      body = %{"error" => %{"message" => "squirrel"}}
-             |> Poison.encode!
-      response = %{status: 400, body: body}
+      body =
+        %{"error" => %{"message" => "squirrel"}}
+        |> Poison.encode!()
+
+      response = {:ok, %{status: 400, body: body}}
       assert {:error, "Bad Request: squirrel"} == Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 401" do
-      response = %{status: 401}
-      assert {:error, "Invalid Credentials: Please check your api_key and secret"} == Helpers.handle_json_response(response)
+      response = {:ok, %{status: 401}}
+
+      assert {:error, "Invalid Credentials: Please check your api_key and secret"} ==
+               Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 403" do
-      response = %{status: 403}
-      assert {:error, "Invalid Credentials: Please check your api_key and secret"} == Helpers.handle_json_response(response)
+      response = {:ok, %{status: 403}}
+
+      assert {:error, "Invalid Credentials: Please check your api_key and secret"} ==
+               Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 404" do
-      response = %{status: 404}
+      response = {:ok, %{status: 404}}
       assert {:error, "Resource not found"} == Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 420" do
-      response = %{status: 420, headers: %{}}
-      assert {:error, "Your rate limit will be reset on unknown date"} == Helpers.handle_json_response(response)
+      response = {:ok, %Tesla.Env{status: 420, headers: []}}
+
+      assert {:error, "Your rate limit will be reset on unknown date"} ==
+               Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 420 with header set" do
-      response = %{status: 420, headers: %{"x-featureratelimit-reset" => "squirrel"}}
-      assert {:error, "Your rate limit will be reset on squirrel"} == Helpers.handle_json_response(response)
+      response = {
+        :ok,
+        %Tesla.Env{
+          status: 420,
+          headers: [{"x-featureratelimit-reset", "squirrel"}]
+        }
+      }
+
+      assert {:error, "Your rate limit will be reset on squirrel"} ==
+               Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 500" do
-      response = %{status: 500, body: "squirrel"}
+      response = {:ok, %{status: 500, body: "squirrel"}}
       assert {:error, "General Error: squirrel"} == Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 419" do
-      response = %{status: 419, body: "squirrel"}
+      response = {:ok, %{status: 419, body: "squirrel"}}
       assert {:error, "squirrel"} == Helpers.handle_json_response(response)
     end
   end

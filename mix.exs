@@ -4,19 +4,26 @@ defmodule Cloudinex.Mixfile do
   @version "0.4.0"
 
   def project do
-    [app: :cloudinex,
-     version: @version,
-     elixir: "~> 1.2",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     elixirc_paths: elixirc_paths(Mix.env),
-     name: "cloudinex",
-     source_url: "https://github.com/veverkap/cloudinex",
-     test_coverage: [tool: ExCoveralls],
-     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
-     deps: deps(Mix.env),
-     description: description(),
-     package: package()]
+    [
+      app: :cloudinex,
+      version: @version,
+      elixir: "~> 1.2",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      name: "cloudinex",
+      source_url: "https://github.com/veverkap/cloudinex",
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
+      deps: deps(Mix.env()),
+      description: description(),
+      package: package()
+    ]
   end
 
   # Configuration for the OTP application
@@ -28,7 +35,7 @@ defmodule Cloudinex.Mixfile do
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
   # Dependencies can be Hex packages:
   #
   #   {:my_dep, "~> 0.3.0"}
@@ -41,14 +48,13 @@ defmodule Cloudinex.Mixfile do
   defp deps do
     [
       {:poison, ">= 1.0.0"},
-      {:tesla, "~> 0.8"},
-
+      {:tesla, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},
       {:excoveralls, "~> 0.7", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:ex_guard, "~> 1.3", only: :dev},
-      {:plug, "~> 1.4", only: [:dev, :test]},
+      {:plug, "~> 1.4", only: [:dev, :test]}
     ]
   end
 

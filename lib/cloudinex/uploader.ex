@@ -11,12 +11,15 @@ defmodule Cloudinex.Uploader do
   require Logger
   alias Cloudinex.Helpers
   alias Tesla.Multipart
-  plug Tesla.Middleware.BaseUrl, base_url()
-  plug Tesla.Middleware.BasicAuth, username: Helpers.api_key(),
-                                   password: Helpers.secret()
-  plug Cloudinex.Middleware, enabled: false
-  plug Tesla.Middleware.FormUrlencoded
-  adapter Tesla.Adapter.Hackney
+  plug(Tesla.Middleware.BaseUrl, base_url())
+
+  plug(Tesla.Middleware.BasicAuth,
+    username: Helpers.api_key(),
+    password: Helpers.secret()
+  )
+
+  plug(Tesla.Middleware.FormUrlencoded)
+  adapter(Tesla.Adapter.Hackney)
 
   @doc """
     Creates a new image with the text binary provided
@@ -39,18 +42,18 @@ defmodule Cloudinex.Uploader do
       "width" => 33}}}
     ```
   """
-  @spec upload_text(text :: String.t, options :: Map.t) :: {atom, Map.t}
+  @spec upload_text(text :: String.t(), options :: Map.t()) :: {atom, Map.t()}
   def upload_text(text, opts \\ %{}) do
     params =
       opts
       |> Map.merge(%{text: text})
-      |> Helpers.prepare_opts
-      |> Helpers.sign
-      |> URI.encode_query
+      |> Helpers.prepare_opts()
+      |> Helpers.sign()
+      |> URI.encode_query()
 
     client()
     |> post("/image/text", params)
-    |> Helpers.handle_json_response
+    |> Helpers.handle_json_response()
   end
 
   @doc """
@@ -78,19 +81,20 @@ defmodule Cloudinex.Uploader do
 
     [API Docs](http://cloudinary.com/documentation/upload_images#uploading_with_a_direct_call_to_the_api)
   """
-  @spec upload_url(url :: String.t, options :: Map.t) :: {atom, Map.t}
+  @spec upload_url(url :: String.t(), options :: Map.t()) :: {atom, Map.t()}
   def upload_url(url, options \\ %{}) do
     # with {:ok, options} <- Validation.validate_upload_options(options) do
-      params =
-        options
-        |> Map.merge(%{file: url})
-        |> Helpers.prepare_opts
-        |> Helpers.sign
-        |> URI.encode_query
+    params =
+      options
+      |> Map.merge(%{file: url})
+      |> Helpers.prepare_opts()
+      |> Helpers.sign()
+      |> URI.encode_query()
 
-      client()
-      |> post("/image/upload", params)
-      |> Helpers.handle_json_response
+    client()
+    |> post("/image/upload", params)
+    |> Helpers.handle_json_response()
+
     # end
   end
 
@@ -119,37 +123,42 @@ defmodule Cloudinex.Uploader do
 
     [API Docs](http://cloudinary.com/documentation/upload_images#uploading_with_a_direct_call_to_the_api)
   """
-  @spec upload_file(file_path :: String.t, options :: Map.t) :: {atom, Map.t}
+  @spec upload_file(file_path :: String.t(), options :: Map.t()) :: {atom, Map.t()}
   def upload_file(file_path, options \\ %{}) do
     options
     |> generate_upload_keys
     |> file_upload(file_path)
   end
 
-  defp file_upload(%{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp} = options, file_path) do
-    mp = Multipart.new
-         |> Multipart.add_content_type_param("application/x-www-form-urlencoded")
-         |> Multipart.add_file(file_path)
+  defp file_upload(
+         %{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp} = options,
+         file_path
+       ) do
+    mp =
+      Multipart.new()
+      |> Multipart.add_content_type_param("application/x-www-form-urlencoded")
+      |> Multipart.add_file(file_path)
 
-    mp = Enum.reduce(options, mp, fn({key, value}, acc) -> Multipart.add_field(acc, key, value) end)
+    mp =
+      Enum.reduce(options, mp, fn {key, value}, acc -> Multipart.add_field(acc, key, value) end)
 
     client()
     |> post("/image/upload", mp)
-    |> Helpers.handle_json_response
+    |> Helpers.handle_json_response()
   end
 
   defp generate_upload_keys(options) do
     options
-    |> Helpers.prepare_opts
-    |> Helpers.sign
-    |> Helpers.unify
+    |> Helpers.prepare_opts()
+    |> Helpers.sign()
+    |> Helpers.unify()
   end
 
   defp client do
-    Tesla.build_client []
+    Tesla.build_client([])
   end
 
   defp base_url do
-    Helpers.base_url() <> Helpers.cloud_name
+    Helpers.base_url() <> Helpers.cloud_name()
   end
 end

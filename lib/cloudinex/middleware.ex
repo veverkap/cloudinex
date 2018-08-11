@@ -1,8 +1,11 @@
 defmodule Cloudinex.Middleware do
   @moduledoc false
   require Logger
+  alias Tesla.Error
 
-  def call(env, next, [enabled: false]) do
+  def call({:ok, env}, next, enabled: false), do: call(env, next, enabled: false)
+
+  def call(env, next, enabled: false) do
     {time, env} = :timer.tc(Tesla, :run, [env, next])
     _ = logit(env, time)
     env
@@ -30,79 +33,95 @@ defmodule Cloudinex.Middleware do
   end
 
   def log_request(env) do
-    Logger.debug fn ->
-      "-> #{env.method |> to_string |> String.upcase} #{env.url}"
-    end
+    Logger.debug(fn ->
+      "-> #{env.method |> to_string |> String.upcase()} #{env.url}"
+    end)
+
     env
   end
 
+  def log_response({time, {:ok, env}}), do: log_response({time, env})
+
   def log_response({time, env}) do
     ms = :io_lib.format("~.3f", [time / 1000])
-    _ = Logger.debug ""
-    Logger.debug fn ->
+    _ = Logger.debug("")
+
+    Logger.debug(fn ->
       "<- HTTP/1.1 #{env.status} (Duration #{ms} ms)"
-    end
+    end)
+
     env
   end
 
   def log_headers(env, prefix) do
     for {k, v} <- env.headers do
-      Logger.debug fn ->
+      Logger.debug(fn ->
         "#{prefix}#{k}: #{v}"
-      end
+      end)
     end
+
     env
   end
 
   def log_params(env, prefix) do
     for {k, v} <- env.query do
-      Logger.debug fn ->
+      Logger.debug(fn ->
         "#{prefix} Query Param '#{k}': '#{v}'"
-      end
+      end)
     end
+
     env
   end
 
   def log_body(%Tesla.Env{} = env, _prefix) do
-    Map.update!(env, :body, & log_body(&1, "> "))
+    Map.update!(env, :body, &log_body(&1, "> "))
   end
+
   def log_body(nil, _), do: nil
   def log_body([], _), do: nil
   def log_body(%Stream{} = stream, prefix), do: log_body_stream(stream, prefix)
   def log_body(stream, prefix) when is_function(stream), do: log_body_stream(stream, prefix)
+
   def log_body(data, prefix) when is_binary(data) or is_list(data) do
-    _ = Logger.debug ""
-    Logger.debug fn ->
-      "#{prefix} #{inspect data}"
-    end
+    _ = Logger.debug("")
+
+    Logger.debug(fn ->
+      "#{prefix} #{inspect(data)}"
+    end)
+
     data
   end
+
   def log_body(data, prefix) when is_map(data) do
-    _ = Logger.debug ""
-    Logger.debug fn ->
-      "#{prefix} #{inspect data}"
-    end
+    _ = Logger.debug("")
+
+    Logger.debug(fn ->
+      "#{prefix} #{inspect(data)}"
+    end)
+
     data
   end
 
   def log_body_stream(stream, prefix) do
-    _ = Logger.debug ""
-    Stream.each stream, fn line -> Logger.debug prefix <> line end
+    _ = Logger.debug("")
+    Stream.each(stream, fn line -> Logger.debug(prefix <> line) end)
   end
 
-  defp log_exception(%Tesla.Error{message: message, reason: reason}, prefix) do
-    _ = Logger.debug prefix <> message <> " (#{inspect reason})"
+  defp log_exception(%Error{} = error, prefix) do
+    _ = Logger.debug(prefix <> Error.message(error))
   end
+
+  defp logit({:ok, env}, time), do: logit(env, time)
 
   defp logit(env, time) do
     ms = :io_lib.format("~.3f", [time / 1000])
-    method = env.method |> to_string |> String.upcase
+    method = env.method |> to_string |> String.upcase()
     message = "#{method} #{env.url} -> #{env.status} (#{ms} ms)"
 
     cond do
-      env.status >= 400 -> Logger.error message
-      env.status >= 300 -> Logger.warn message
-      true              -> Logger.info message
+      env.status >= 400 -> Logger.error(message)
+      env.status >= 300 -> Logger.warn(message)
+      true -> Logger.info(message)
     end
   end
 end

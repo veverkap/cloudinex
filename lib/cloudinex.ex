@@ -36,18 +36,21 @@ defmodule Cloudinex do
   alias Mix.Project
   import Cloudinex.Validation
 
-  plug Tesla.Middleware.BaseUrl, base_url()
-  plug Tesla.Middleware.BasicAuth, username: Helpers.api_key(),
-                                   password: Helpers.secret()
-  plug Tesla.Middleware.JSON
-  plug Cloudinex.Middleware, enabled: Helpers.debug?()
-  adapter Tesla.Adapter.Hackney
+  plug(Tesla.Middleware.BaseUrl, base_url())
+
+  plug(Tesla.Middleware.BasicAuth,
+    username: Helpers.api_key(),
+    password: Helpers.secret()
+  )
+
+  plug(Tesla.Middleware.JSON)
+  adapter(Tesla.Adapter.Hackney)
 
   @doc """
     Returns current version of library from Mix file
   """
-  @spec version() :: String.t
-  def version, do: Project.config[:version]
+  @spec version() :: String.t()
+  def version, do: Project.config()[:version]
   @valid_moderation_types ~w(manual webpurify aws_rek metascan)
   @valid_moderation_statuses ~w(pending approved rejected)
 
@@ -65,7 +68,7 @@ defmodule Cloudinex do
   def ping do
     client()
     |> get("/ping")
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -82,7 +85,7 @@ defmodule Cloudinex do
   def ping! do
     client()
     |> get("/ping")
-    |> Helpers.handle_bang_response
+    |> Helpers.handle_bang_response()
   end
 
   @doc """
@@ -112,7 +115,7 @@ defmodule Cloudinex do
   def usage do
     client()
     |> get("/usage")
-    |> Helpers.handle_bang_response
+    |> Helpers.handle_bang_response()
   end
 
   @doc """
@@ -127,7 +130,7 @@ defmodule Cloudinex do
   def resource_types do
     client()
     |> get("/resources")
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -167,27 +170,39 @@ defmodule Cloudinex do
     ```
     [API Docs](http://cloudinary.com/documentation/admin_api#list_resources)
   """
-  @spec resources(options :: Keyword.t) :: map
+  @spec resources(options :: Keyword.t()) :: map
   def resources(options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
-    {type, options}          = Keyword.pop(options, :type)
+    {type, options} = Keyword.pop(options, :type)
 
-    url = case type do
-      nil ->
-        "/resources/#{resource_type}"
-      type ->
-        "/resources/#{resource_type}/#{type}"
-    end
+    url =
+      case type do
+        nil ->
+          "/resources/#{resource_type}"
 
-    keys = [:context, :direction, :max_results, :moderations, :next_cursor,
-            :prefix, :public_ids, :start_at, :tags]
+        type ->
+          "/resources/#{resource_type}/#{type}"
+      end
 
-    options = options
-              |> Keyword.take(keys)
+    keys = [
+      :context,
+      :direction,
+      :max_results,
+      :moderations,
+      :next_cursor,
+      :prefix,
+      :public_ids,
+      :start_at,
+      :tags
+    ]
+
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -203,7 +218,7 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_by_tag)
   """
-  @spec resources_by_tag(tag :: String.t, options :: Keyword.t) :: map
+  @spec resources_by_tag(tag :: String.t(), options :: Keyword.t()) :: map
   def resources_by_tag(tag, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
@@ -211,12 +226,13 @@ defmodule Cloudinex do
 
     keys = [:max_results, :next_cursor, :direction, :tags, :context, :moderations]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -232,25 +248,29 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_by_context)
   """
-  @spec resources_by_context(key :: String.t, value :: String.t, options :: Keyword.t) :: map
+  @spec resources_by_context(key :: String.t(), value :: String.t(), options :: Keyword.t()) ::
+          map
   def resources_by_context(key, value \\ nil, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
-    url = case value do
-      nil ->
-        "/resources/#{resource_type}/context/?key=#{key}"
-      value ->
-        "/resources/#{resource_type}/context/?key=#{key}&value=#{value}"
-    end
+    url =
+      case value do
+        nil ->
+          "/resources/#{resource_type}/context/?key=#{key}"
+
+        value ->
+          "/resources/#{resource_type}/context/?key=#{key}&value=#{value}"
+      end
 
     keys = [:max_results, :next_cursor, :direction, :tags, :context]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -269,19 +289,20 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_resources_in_moderation_queues)
   """
-  @spec resources_by_moderation(moderation_type :: String.t,
-                                status :: String.t,
-                                options :: Keyword.t) :: map
+  @spec resources_by_moderation(
+          moderation_type :: String.t(),
+          status :: String.t(),
+          options :: Keyword.t()
+        ) :: map
   def resources_by_moderation(moderation_type, status, options \\ [])
-    when moderation_type in @valid_moderation_types
-    and status in @valid_moderation_statuses do
+      when moderation_type in @valid_moderation_types and status in @valid_moderation_statuses do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
     url = "/resources/#{resource_type}/moderations/#{moderation_type}/#{status}"
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -306,22 +327,22 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_resource)
   """
-  @spec resource(public_id :: String.t, options :: Keyword.t) :: map
+  @spec resource(public_id :: String.t(), options :: Keyword.t()) :: map
   def resource(public_id, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
     {type, options} = Keyword.pop(options, :type, "upload")
 
     url = "/resources/#{resource_type}/#{type}/#{public_id}"
 
-    keys = [:colors, :exif, :faces, :image_metadata, :pages, :phash,
-            :coordinates, :max_results]
+    keys = [:colors, :exif, :faces, :image_metadata, :pages, :phash, :coordinates, :max_results]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -344,34 +365,46 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#update_resources)
   """
-  @spec update_resource(public_id :: String.t, options :: Keyword.t) :: map
+  @spec update_resource(public_id :: String.t(), options :: Keyword.t()) :: map
   def update_resource(public_id, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
     {type, options} = Keyword.pop(options, :type, "upload")
 
     url = "/resources/#{resource_type}/#{type}/#{public_id}"
 
-    keys = [:tags, :context, :face_coordinates, :custom_coordinates,
-            :moderation_status, :auto_tagging, :detection, :ocr, :raw_convert,
-            :categorization, :background_removal, :notification_url]
+    keys = [
+      :tags,
+      :context,
+      :face_coordinates,
+      :custom_coordinates,
+      :moderation_status,
+      :auto_tagging,
+      :detection,
+      :ocr,
+      :raw_convert,
+      :categorization,
+      :background_removal,
+      :notification_url
+    ]
 
-    options = options
-              |> remove_invalid_keys(keys)
-              |> parse_keyword(:face_coordinates, &Helpers.map_coordinates/1)
-              |> parse_keyword(:custom_coordinates, &Helpers.map_coordinates/1)
-              |> parse_keyword(:tags, &Helpers.join_list/1)
-              |> parse_keyword(:context, &Helpers.map_context/1)
-              |> valid_member?(["approved", "rejected"], :moderation_status)
-              |> valid_member?(["remove_the_background", "pixelz"], :background_removal)
-              |> valid_option?(:detection, "adv_face")
-              |> valid_option?(:ocr, "adv_ocr")
-              |> valid_option?(:raw_convert, "aspose")
-              |> valid_option?(:categorization, "imagga_tagging")
-              |> valid_float_range?(:auto_tagging, 0.0, 1.0)
+    options =
+      options
+      |> remove_invalid_keys(keys)
+      |> parse_keyword(:face_coordinates, &Helpers.map_coordinates/1)
+      |> parse_keyword(:custom_coordinates, &Helpers.map_coordinates/1)
+      |> parse_keyword(:tags, &Helpers.join_list/1)
+      |> parse_keyword(:context, &Helpers.map_context/1)
+      |> valid_member?(["approved", "rejected"], :moderation_status)
+      |> valid_member?(["remove_the_background", "pixelz"], :background_removal)
+      |> valid_option?(:detection, "adv_face")
+      |> valid_option?(:ocr, "adv_ocr")
+      |> valid_option?(:raw_convert, "aspose")
+      |> valid_option?(:categorization, "imagga_tagging")
+      |> valid_float_range?(:auto_tagging, 0.0, 1.0)
 
     client()
     |> post(url, Helpers.unify(options))
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -383,7 +416,7 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#restore_resources)
   """
-  @spec restore_resource(public_ids :: List.t, options :: Keyword.t) :: map
+  @spec restore_resource(public_ids :: List.t(), options :: Keyword.t()) :: map
   def restore_resource(public_ids, options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
     {type, _options} = Keyword.pop(options, :type, "upload")
@@ -392,7 +425,7 @@ defmodule Cloudinex do
 
     client()
     |> post(url, %{public_ids: public_ids})
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -402,16 +435,17 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#delete_derived_resources)
   """
-  @spec delete_derived_resources(derived_resource_ids :: List.t, options :: Keyword.t) :: map
+  @spec delete_derived_resources(derived_resource_ids :: List.t(), options :: Keyword.t()) :: map
   def delete_derived_resources(derived_resource_ids, options \\ []) do
-    query = [derived_resource_ids: derived_resource_ids]
-          |> Keyword.merge(options)
+    query =
+      [derived_resource_ids: derived_resource_ids]
+      |> Keyword.merge(options)
 
     url = "/derived_resources"
 
     client()
     |> request(method: :delete, url: url, query: query)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -423,7 +457,7 @@ defmodule Cloudinex do
     * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
-  @spec delete_resource(public_id :: String.t, options :: Keyword.t) :: map
+  @spec delete_resource(public_id :: String.t(), options :: Keyword.t()) :: map
   def delete_resource(public_id, options \\ []) when is_binary(public_id),
     do: delete_resources(%{public_ids: [public_id]}, options)
 
@@ -436,9 +470,10 @@ defmodule Cloudinex do
     * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
-  @spec delete_resources_by_prefix(prefix :: String.t, options :: Keyword.t) :: map
+  @spec delete_resources_by_prefix(prefix :: String.t(), options :: Keyword.t()) :: map
   def delete_resources_by_prefix(prefix, options \\ []) when is_binary(prefix),
     do: delete_resources(%{prefix: prefix}, options)
+
   @doc """
     Delete all resources (of the relevant resource type and type), including derived resources (up to a maximum of 1000 original resources).
 
@@ -448,9 +483,10 @@ defmodule Cloudinex do
     * `:transformations` - Optional. Only the derived resources matching this array of transformation parameters will be deleted.
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
-  @spec delete_all_resources(options :: Keyword.t) :: map
+  @spec delete_all_resources(options :: Keyword.t()) :: map
   def delete_all_resources(options \\ []),
     do: delete_resources(%{all: true}, options)
+
   @doc """
     Delete all resources (and their derivatives) with the given tag name (up to a maximum of 1000 original resources).
 
@@ -462,12 +498,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#delete_resources_by_tags)
   """
-  @spec delete_resources_by_tag(tag :: String.t, options :: Keyword.t) :: map
+  @spec delete_resources_by_tag(tag :: String.t(), options :: Keyword.t()) :: map
   def delete_resources_by_tag(tag, options \\ []),
     do: delete_resources(%{tag: tag}, options)
 
-  @spec delete_resources(hash :: Map.t, options :: Keyword.t) :: map
+  @spec delete_resources(hash :: Map.t(), options :: Keyword.t()) :: map
   def delete_resources(hash, options \\ [])
+
   @doc """
     Delete all resources with the given public IDs (array of up to 100 public_ids).
 
@@ -478,9 +515,11 @@ defmodule Cloudinex do
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
   def delete_resources(%{public_ids: public_ids}, options) when is_list(public_ids),
-    do: delete_resources(%{public_ids:  Helpers.join_list(public_ids)}, options)
+    do: delete_resources(%{public_ids: Helpers.join_list(public_ids)}, options)
+
   def delete_resources(%{public_ids: public_ids}, options) when is_binary(public_ids),
-    do: call_delete(options, [public_ids: public_ids])
+    do: call_delete(options, public_ids: public_ids)
+
   @doc """
     Delete all resources, including derived resources, where the public ID starts with the given prefix (up to a maximum of 1000 original resources).
 
@@ -491,7 +530,8 @@ defmodule Cloudinex do
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
   def delete_resources(%{prefix: prefix}, options) when is_binary(prefix),
-    do: call_delete(options, [prefix: prefix])
+    do: call_delete(options, prefix: prefix)
+
   @doc """
     Delete all resources (of the relevant resource type and type), including derived resources (up to a maximum of 1000 original resources).
 
@@ -502,7 +542,8 @@ defmodule Cloudinex do
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
   def delete_resources(%{all: true}, options),
-    do: call_delete(options, [all: true])
+    do: call_delete(options, all: true)
+
   @doc """
     Delete all resources (and their derivatives) with the given tag name (up to a maximum of 1000 original resources).
 
@@ -513,7 +554,7 @@ defmodule Cloudinex do
     * `:next_cursor` - Optional. When a deletion request has more than 1000 resources to delete, the response includes the partial boolean parameter set to true, as well as a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following deletion request.
   """
   def delete_resources(%{tag: tag}, options),
-    do: call_delete(options, [tag: tag])
+    do: call_delete(options, tag: tag)
 
   defp call_delete(options, query) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
@@ -521,18 +562,21 @@ defmodule Cloudinex do
     {tag, query} = Keyword.pop(query, :tag)
 
     keys = [:keep_original, :next_cursor, :invalidate, :transformations]
-    query = options
-            |> remove_invalid_keys(keys)
-            |> Keyword.merge(query)
 
-    url = case tag do
-      nil -> "/resources/#{resource_type}/#{type}"
-      tag -> "/resources/#{resource_type}/tags/#{tag}"
-    end
+    query =
+      options
+      |> remove_invalid_keys(keys)
+      |> Keyword.merge(query)
+
+    url =
+      case tag do
+        nil -> "/resources/#{resource_type}/#{type}"
+        tag -> "/resources/#{resource_type}/tags/#{tag}"
+      end
 
     client()
     |> request(method: :delete, url: url, query: query)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -545,7 +589,7 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_tags)
   """
-  @spec tags(options :: Keyword.t) :: map
+  @spec tags(options :: Keyword.t()) :: map
   def tags(options \\ []) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
 
@@ -553,12 +597,13 @@ defmodule Cloudinex do
 
     keys = [:prefix, :max_results, :next_cursor]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -569,18 +614,19 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_transformations)
   """
-  @spec transformations(options :: Keyword.t) :: map
+  @spec transformations(options :: Keyword.t()) :: map
   def transformations(options \\ []) do
     url = "/transformations"
 
     keys = [:max_results, :next_cursor]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -591,18 +637,19 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_transformation)
   """
-  @spec transformation(id :: String.t, options :: Keyword.t) :: map
+  @spec transformation(id :: String.t(), options :: Keyword.t()) :: map
   def transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
     keys = [:max_results, :next_cursor]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -612,13 +659,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#delete_transformation)
   """
-  @spec delete_transformation(id :: String.t, options :: Keyword.t) :: map
+  @spec delete_transformation(id :: String.t(), options :: Keyword.t()) :: map
   def delete_transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
     client()
     |> delete(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -629,13 +676,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#update_transformation)
   """
-  @spec update_transformation(id :: String.t, options :: Keyword.t) :: map
+  @spec update_transformation(id :: String.t(), options :: Keyword.t()) :: map
   def update_transformation(id, options \\ []) do
     url = "/transformations/#{id}"
 
     client()
     |> request(method: :put, url: url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -646,13 +693,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#create_named_transformation)
   """
-  @spec create_transformation(name :: String.t, transformation :: String.t) :: map
+  @spec create_transformation(name :: String.t(), transformation :: String.t()) :: map
   def create_transformation(name, transformation) do
     url = "/transformations/#{name}"
 
     client()
     |> post(url, %{transformation: transformation})
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -663,18 +710,19 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_upload_mappings)
   """
-  @spec upload_mappings(options :: Keyword.t) :: map
+  @spec upload_mappings(options :: Keyword.t()) :: map
   def upload_mappings(options \\ []) do
     url = "/upload_mappings"
 
     keys = [:max_results, :next_cursor]
 
-    options = options
-              |> Keyword.take(keys)
+    options =
+      options
+      |> Keyword.take(keys)
 
     client()
     |> get(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -684,13 +732,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_upload_mapping)
   """
-  @spec upload_mapping(folder :: String.t) :: map
+  @spec upload_mapping(folder :: String.t()) :: map
   def upload_mapping(folder) do
     url = "/upload_mappings/#{folder}"
 
     client()
     |> get(url)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -698,13 +746,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#create_an_upload_mapping)
   """
-  @spec create_upload_mapping(folder :: String.t, template :: String.t) :: map
+  @spec create_upload_mapping(folder :: String.t(), template :: String.t()) :: map
   def create_upload_mapping(folder, template) do
     url = "/upload_mappings"
 
     client()
     |> post(url, %{folder: folder, template: template})
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -712,13 +760,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#delete_an_upload_mapping)
   """
-  @spec delete_upload_mapping(folder :: String.t) :: map
+  @spec delete_upload_mapping(folder :: String.t()) :: map
   def delete_upload_mapping(folder) do
     url = "/upload_mappings/#{folder}"
 
     client()
     |> delete(url)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -730,7 +778,7 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#update_an_upload_mapping)
   """
-  @spec update_upload_mapping(folder :: String.t, template :: String.t) :: map
+  @spec update_upload_mapping(folder :: String.t(), template :: String.t()) :: map
   def update_upload_mapping(folder, template) do
     url = "/upload_mappings"
 
@@ -738,7 +786,7 @@ defmodule Cloudinex do
 
     client()
     |> request(method: :put, url: url, query: query)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -756,14 +804,18 @@ defmodule Cloudinex do
     * `:resource_type` - Optional (String, default: image). The type of file. Possible values: image, raw, video. Relevant as a parameter only when using the SDKs (the resource type is included in the endpoint URL for direct calls to the HTTP API). Note: Use the video resource type for all video resources as well as for audio files, such as .mp3.
     * `:next_cursor` - Optional. When an update request has more than 100 resources to update, the response includes a next_cursor value. You can then specify this returned next_cursor value as the next_cursor parameter of the following update request.
   """
-  @spec update_access_mode(hash :: Map.t, options :: Keyword.t) :: map
+  @spec update_access_mode(hash :: Map.t(), options :: Keyword.t()) :: map
   def update_access_mode(hash, access_mode, options \\ [])
-  def update_access_mode(%{public_ids: public_ids}, access_mode, options) when is_list(public_ids),
-    do: call_update_access_mode(options, access_mode, [public_ids: public_ids])
+
+  def update_access_mode(%{public_ids: public_ids}, access_mode, options)
+      when is_list(public_ids),
+      do: call_update_access_mode(options, access_mode, public_ids: public_ids)
+
   def update_access_mode(%{prefix: prefix}, access_mode, options) when is_binary(prefix),
-    do: call_update_access_mode(options, access_mode, [prefix: prefix])
+    do: call_update_access_mode(options, access_mode, prefix: prefix)
+
   def update_access_mode(%{tag: tag}, access_mode, options) when is_binary(tag),
-    do: call_update_access_mode(options, access_mode, [tag: tag])
+    do: call_update_access_mode(options, access_mode, tag: tag)
 
   defp call_update_access_mode(options, access_mode, query) do
     {resource_type, options} = Keyword.pop(options, :resource_type, "image")
@@ -773,15 +825,16 @@ defmodule Cloudinex do
 
     keys = [:public_ids, :prefix, :tag, :next_cursor, :access_mode]
 
-    options = options
-              |> Keyword.merge(query)
-              |> Keyword.merge([access_mode: access_mode])
-              |> remove_invalid_keys(keys)
-              |> valid_member?(["public", "authenticated"], :access_mode)
+    options =
+      options
+      |> Keyword.merge(query)
+      |> Keyword.merge(access_mode: access_mode)
+      |> remove_invalid_keys(keys)
+      |> valid_member?(["public", "authenticated"], :access_mode)
 
     client()
     |> request(method: :put, url: url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -793,7 +846,7 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_upload_presets)
   """
-  @spec upload_presets(options :: Keyword.t) :: map
+  @spec upload_presets(options :: Keyword.t()) :: map
   def upload_presets(options \\ []) do
     url = "/upload_presets"
 
@@ -807,7 +860,7 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#details_of_a_single_upload_preset)
   """
-  @spec upload_preset(preset_name :: String.t) :: map
+  @spec upload_preset(preset_name :: String.t()) :: map
   def upload_preset(preset_name) do
     url = "/upload_presets/#{preset_name}"
 
@@ -827,18 +880,22 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#create_an_upload_preset)
   """
-  @spec create_upload_preset(name :: String.t, unsigned :: boolean,
-                             disallow_public_id :: boolean,
-                             settings :: Keyword.t) :: map
+  @spec create_upload_preset(
+          name :: String.t(),
+          unsigned :: boolean,
+          disallow_public_id :: boolean,
+          settings :: Keyword.t()
+        ) :: map
   def create_upload_preset(name, unsigned, disallow_public_id, settings \\ []) do
     url = "/upload_presets"
 
-    settings = settings
-               |> Keyword.merge([name: name, unsigned: unsigned,
-                                 disallow_public_id: disallow_public_id])
+    settings =
+      settings
+      |> Keyword.merge(name: name, unsigned: unsigned, disallow_public_id: disallow_public_id)
+
     client()
     |> post(url, Helpers.unify(settings))
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -852,13 +909,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#update_an_upload_preset)
   """
-  @spec update_upload_preset(name :: String.t, settings :: Keyword.t) :: map
+  @spec update_upload_preset(name :: String.t(), settings :: Keyword.t()) :: map
   def update_upload_preset(name, settings \\ []) do
     url = "/upload_presets/#{name}"
 
     client()
     |> request(method: :put, url: url, query: settings)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -866,13 +923,13 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#delete_an_upload_preset)
   """
-  @spec delete_upload_preset(id :: String.t, options :: Keyword.t) :: map
+  @spec delete_upload_preset(id :: String.t(), options :: Keyword.t()) :: map
   def delete_upload_preset(id, options \\ []) do
     url = "/upload_presets/#{id}"
 
     client()
     |> delete(url, query: options)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -886,7 +943,7 @@ defmodule Cloudinex do
 
     client()
     |> get(url)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   @doc """
@@ -894,17 +951,17 @@ defmodule Cloudinex do
 
     [API Docs](http://cloudinary.com/documentation/admin_api#list_subfolders)
   """
-  @spec folders(root_folder :: String.t) :: map
+  @spec folders(root_folder :: String.t()) :: map
   def folders(root_folder) do
     url = "/folders/#{root_folder}"
 
     client()
     |> get(url)
-    |> Helpers.handle_response
+    |> Helpers.handle_response()
   end
 
   defp client do
-    Tesla.build_client []
+    Tesla.build_client([])
   end
 
   defp base_url do

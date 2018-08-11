@@ -1,5 +1,6 @@
 defmodule Cloudinex.Url do
   alias Cloudinex.Helpers
+
   @moduledoc "A module that helps creating urls to your cloudinary image, which can optionally transform the image as well."
 
   @doc """
@@ -62,7 +63,7 @@ defmodule Cloudinex.Url do
     "//res.cloudinary.com/my_cloud_name/image/upload/g_face,h_300,w_400/a_public_id"
     ```
   """
-  @spec for(public_id :: String.t, options :: Map.t) :: String.t
+  @spec for(public_id :: String.t(), options :: Map.t()) :: String.t()
   def for(public_id, options \\ %{}) do
     transformations = transformation_string_from(options)
 
@@ -71,7 +72,7 @@ defmodule Cloudinex.Url do
       resource_type(options),
       "upload",
       signature_for(public_id, options, transformations),
-      (if String.length(transformations) > 0, do: transformations),
+      if(String.length(transformations) > 0, do: transformations),
       version_for(options),
       public_id
     ]
@@ -90,13 +91,14 @@ defmodule Cloudinex.Url do
     signature =
       to_sign
       |> Helpers.crypto_hash()
-      |> Base.encode64
+      |> Base.encode64()
       |> String.slice(0..7)
       |> String.replace("+", "-")
       |> String.replace("/", "_")
 
     "s--#{signature}--"
   end
+
   defp signature_for(_, _, _), do: nil
 
   defp version_for(%{version: version}) when is_integer(version), do: "v#{version}"
@@ -113,6 +115,7 @@ defmodule Cloudinex.Url do
     |> Enum.map(&transformation_string_from/1)
     |> Enum.join("/")
   end
+
   defp transformation_string_from(options) when is_map(options) do
     options
     |> Enum.sort()
@@ -121,12 +124,13 @@ defmodule Cloudinex.Url do
   end
 
   defp join_transformations([]), do: ""
+
   defp join_transformations(transformations) do
     Enum.join(transformations, ",")
   end
 
   defp process(options) do
-    Enum.reduce(options, [], fn({key, value}, acc) ->
+    Enum.reduce(options, [], fn {key, value}, acc ->
       acc ++ process_option(key, value)
     end)
   end
@@ -159,6 +163,6 @@ defmodule Cloudinex.Url do
   defp process_option(_, _), do: []
 
   defp base_url do
-    Helpers.base_image_url <> Helpers.cloud_name
+    Helpers.base_image_url() <> Helpers.cloud_name()
   end
 end
