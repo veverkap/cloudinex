@@ -24,7 +24,7 @@ defmodule Cloudinex.FoldersTest do
       end)
 
       {:ok, body} = Cloudinex.folders()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 

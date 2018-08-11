@@ -24,7 +24,7 @@ defmodule Cloudinex.UploadPresetTest do
       end)
 
       {:ok, body} = Cloudinex.upload_presets()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "upload_presets/1 with max_result returns proper response", %{bypass: bypass} do
@@ -40,7 +40,7 @@ defmodule Cloudinex.UploadPresetTest do
       end)
 
       {:ok, body} = Cloudinex.upload_presets(max_results: 20)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -57,7 +57,7 @@ defmodule Cloudinex.UploadPresetTest do
       end)
 
       {:ok, body} = Cloudinex.upload_preset("xyemrxup")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 

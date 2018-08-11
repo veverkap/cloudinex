@@ -1,13 +1,13 @@
 defmodule Cloudinex.Mixfile do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.5.0"
 
   def project do
     [
       app: :cloudinex,
       version: @version,
-      elixir: "~> 1.2",
+      elixir: "~> 1.4",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -47,7 +47,7 @@ defmodule Cloudinex.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:poison, ">= 1.0.0"},
+      {:jason, ">= 1.0.0"},
       {:tesla, "~> 1.0"},
       {:bypass, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test]},

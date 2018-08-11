@@ -24,7 +24,7 @@ defmodule Cloudinex.UploadMappingTest do
       end)
 
       {:ok, body} = Cloudinex.upload_mappings()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "upload_mappings/1 with max_result returns proper response", %{bypass: bypass} do
@@ -40,7 +40,7 @@ defmodule Cloudinex.UploadMappingTest do
       end)
 
       {:ok, body} = Cloudinex.upload_mappings(max_results: 20)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -57,7 +57,7 @@ defmodule Cloudinex.UploadMappingTest do
       end)
 
       {:ok, body} = Cloudinex.upload_mapping("my_map")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -74,7 +74,7 @@ defmodule Cloudinex.UploadMappingTest do
       end)
 
       {:ok, body} = Cloudinex.create_upload_mapping("folder", "template")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -91,7 +91,7 @@ defmodule Cloudinex.UploadMappingTest do
       end)
 
       {:ok, body} = Cloudinex.delete_upload_mapping("my_map")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -109,7 +109,7 @@ defmodule Cloudinex.UploadMappingTest do
       end)
 
       {:ok, body} = Cloudinex.update_upload_mapping("yep", "sure")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 end

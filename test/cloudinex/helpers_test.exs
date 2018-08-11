@@ -125,14 +125,14 @@ defmodule Cloudinex.HelpersTest do
 
   describe "handle_json_response/1" do
     test "handle_json_response/1 200" do
-      response = {:ok, %{status: 200, body: Poison.encode!("squirrel")}}
+      response = {:ok, %{status: 200, body: Jason.encode!("squirrel")}}
       assert {:ok, "squirrel"} == Helpers.handle_json_response(response)
     end
 
     test "handle_json_response/1 400" do
       body =
         %{"error" => %{"message" => "squirrel"}}
-        |> Poison.encode!()
+        |> Jason.encode!()
 
       response = {:ok, %{status: 400, body: body}}
       assert {:error, "Bad Request: squirrel"} == Helpers.handle_json_response(response)

@@ -2,9 +2,11 @@ language: elixir
 elixir:
   - 1.4.5
   - 1.5.1
+  - 1.7.2
 otp_release:
   - 19.3
   - 20.0
+  - 21.0
 sudo: false
 install:
   - mix do local.hex --force, local.rebar --force

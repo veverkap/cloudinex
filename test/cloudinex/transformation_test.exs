@@ -24,7 +24,7 @@ defmodule Cloudinex.TransformationTest do
       end)
 
       {:ok, body} = Cloudinex.transformations()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "transformations/1 with max_result returns proper response", %{bypass: bypass} do
@@ -40,7 +40,7 @@ defmodule Cloudinex.TransformationTest do
       end)
 
       {:ok, body} = Cloudinex.transformations(max_results: 20)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -57,7 +57,7 @@ defmodule Cloudinex.TransformationTest do
       end)
 
       {:ok, body} = Cloudinex.transformation("c_crop,h_404,w_582,x_0,y_546")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "transformations/1 with max_result returns proper response", %{bypass: bypass} do
@@ -73,7 +73,7 @@ defmodule Cloudinex.TransformationTest do
       end)
 
       {:ok, body} = Cloudinex.transformation("c_crop,h_404,w_582,x_0,y_546", max_results: 20)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -90,7 +90,7 @@ defmodule Cloudinex.TransformationTest do
       end)
 
       {:ok, body} = Cloudinex.delete_transformation("c_crop,h_404,w_582,x_0,y_546")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -110,7 +110,7 @@ defmodule Cloudinex.TransformationTest do
       {:ok, body} =
         Cloudinex.update_transformation("c_crop,h_404,w_582,x_0,y_476", allowed_for_strict: true)
 
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -127,7 +127,7 @@ defmodule Cloudinex.TransformationTest do
       end)
 
       {:ok, body} = Cloudinex.create_transformation("patrick", "w_150,h_100,c_fill")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 end

@@ -68,7 +68,7 @@ defmodule Cloudinex.Helpers do
 
   def handle_json_response(env) do
     case handle_response(env) do
-      {:ok, body} -> Poison.decode(body)
+      {:ok, body} -> Jason.decode(body)
       anything -> anything
     end
   end
@@ -95,7 +95,7 @@ defmodule Cloudinex.Helpers do
   def handle_response(%{status: 200, body: body}), do: {:ok, body}
 
   def handle_response(%{status: 400, body: body}) when is_binary(body),
-    do: handle_response({:ok, %{status: 400, body: Poison.decode!(body)}})
+    do: handle_response({:ok, %{status: 400, body: Jason.decode!(body)}})
 
   def handle_response(%{status: 400, body: body}) when is_map(body) do
     message = Kernel.get_in(body, ["error", "message"])

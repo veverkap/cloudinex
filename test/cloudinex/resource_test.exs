@@ -24,7 +24,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resource_types()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -56,7 +56,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources(resource_type: "image")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "resources/1 loads images of upload type", %{bypass: bypass} do
@@ -71,7 +71,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
 
       Enum.each(body["resources"], fn resource ->
         assert resource["type"] == "upload"
@@ -91,7 +91,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload", tags: true)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
 
       Enum.each(body["resources"], fn resource ->
         assert resource["tags"] == ["apple"]
@@ -111,7 +111,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources(resource_type: "image", type: "upload", context: true)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
       resource = List.first(body["resources"])
       assert resource["context"] == %{"custom" => %{"apple" => "joe", "frank" => "blow"}}
     end
@@ -128,7 +128,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources(resource_type: "image", apple: "jo")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -160,7 +160,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources_by_tag("apple", resource_type: "image")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -178,7 +178,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources_by_context("apple", nil, resource_type: "image")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "resources_by_context/3 loads valid key and value", %{bypass: bypass} do
@@ -194,7 +194,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resources_by_context("apple", "joe", resource_type: "image")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -239,7 +239,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.resource("bfch0noutwapaasvenin", resource_type: "image")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -256,7 +256,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.update_resource("bfch0noutwapaasvenin", tags: ["cinammon"])
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -337,7 +337,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resource("bfch0noutwapaasvenin")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -356,7 +356,7 @@ defmodule Cloudinex.ResourceTest do
 
       ids = ["bfch0noutwapaasvenin", "dude"]
       {:ok, body} = Cloudinex.delete_resources(%{public_ids: ids})
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with public_ids binary", %{bypass: bypass} do
@@ -373,7 +373,7 @@ defmodule Cloudinex.ResourceTest do
 
       ids = "bfch0noutwapaasvenin,dude"
       {:ok, body} = Cloudinex.delete_resources(%{public_ids: ids})
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with public_ids binary and keep_original", %{bypass: bypass} do
@@ -390,7 +390,7 @@ defmodule Cloudinex.ResourceTest do
 
       ids = "bfch0noutwapaasvenin,dude"
       {:ok, body} = Cloudinex.delete_resources(%{public_ids: ids}, keep_original: true)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with prefix binary", %{bypass: bypass} do
@@ -406,7 +406,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources(%{prefix: "ap"})
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with all", %{bypass: bypass} do
@@ -422,7 +422,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources(%{all: true})
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with tag", %{bypass: bypass} do
@@ -438,7 +438,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources(%{tag: "apple"})
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with tag and keep_original", %{bypass: bypass} do
@@ -454,7 +454,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources(%{tag: "apple"}, keep_original: true)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "delete_resources/2 with all and invalidate", %{bypass: bypass} do
@@ -470,7 +470,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources(%{all: true}, invalidate: true)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -491,7 +491,7 @@ defmodule Cloudinex.ResourceTest do
 
       ids = ["a7b2a2756a", "dude"]
       {:ok, body} = Cloudinex.delete_derived_resources(ids)
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -509,7 +509,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources_by_prefix("ap")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -527,7 +527,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_all_resources()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 
@@ -545,7 +545,7 @@ defmodule Cloudinex.ResourceTest do
       end)
 
       {:ok, body} = Cloudinex.delete_resources_by_tag("apple")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 end

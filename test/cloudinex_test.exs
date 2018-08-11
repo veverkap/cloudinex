@@ -41,7 +41,7 @@ defmodule CloudinexTest do
       end)
 
       {:ok, body} = Cloudinex.ping()
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "ping/0 handles rate limit", %{bypass: bypass} do
@@ -160,7 +160,7 @@ defmodule CloudinexTest do
       end)
 
       {:ok, body} = Cloudinex.tags(resource_type: "image")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
 
     test "tags/1 with prefix returns proper response", %{bypass: bypass} do
@@ -176,7 +176,7 @@ defmodule CloudinexTest do
       end)
 
       {:ok, body} = Cloudinex.tags(resource_type: "image", prefix: "ap")
-      assert body == Poison.decode!(response)
+      assert body == Jason.decode!(response)
     end
   end
 end
