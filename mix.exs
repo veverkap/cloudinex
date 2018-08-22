@@ -7,7 +7,7 @@ defmodule Cloudinex.Mixfile do
     [
       app: :cloudinex,
       version: @version,
-      elixir: "~> 1.6",
+      elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
