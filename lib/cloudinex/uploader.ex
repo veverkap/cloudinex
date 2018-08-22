@@ -102,7 +102,7 @@ defmodule Cloudinex.Uploader do
     Uploads file
 
     ```elixir
-    iex> Cloudinex.Uploader.upload_url("./example.jpg")
+    iex> Cloudinex.Uploader.upload_file("./example.jpg", %{"type": "image"})
     {:ok,
       %{"bytes" => 228821,
         "created_at" => "2017-09-03T20:43:45Z",
@@ -124,27 +124,33 @@ defmodule Cloudinex.Uploader do
     [API Docs](http://cloudinary.com/documentation/upload_images#uploading_with_a_direct_call_to_the_api)
   """
   @spec upload_file(file_path :: String.t(), options :: Map.t()) :: {atom, Map.t()}
-  def upload_file(file_path, options \\ %{}) do
+  def upload_file(file_path, options \\ %{type: "image"}) do
+    {type, options} = Map.pop(options, :type)
+
     options
     |> generate_upload_keys
-    |> file_upload(file_path)
+    |> file_upload(file_path, type)
   end
 
-  defp file_upload(
-         %{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp} = options,
-         file_path
-       ) do
-    mp =
-      Multipart.new()
-      |> Multipart.add_content_type_param("application/x-www-form-urlencoded")
-      |> Multipart.add_file(file_path)
+  defp file_upload(%{"api_key" => api_key, "signature" => signature, "timestamp" => timestamp} = options, file_path, type) do
+    mp = Multipart.new
+         |> Multipart.add_content_type_param("application/x-www-form-urlencoded")
+         |> Multipart.add_file(file_path)
 
     mp =
       Enum.reduce(options, mp, fn {key, value}, acc -> Multipart.add_field(acc, key, value) end)
 
+    url = case type do
+      "image" -> "/image/upload"
+      "video" -> "/video/upload"
+      _ -> Logger.debug fn ->
+        ~s(upload_file called with an unsupported media type. "image" and "video" are the only supported types.)
+      end
+    end
+
     client()
-    |> post("/image/upload", mp)
-    |> Helpers.handle_json_response()
+    |> post(url, mp)
+    |> Helpers.handle_json_response
   end
 
   defp generate_upload_keys(options) do
